@@ -640,7 +640,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void setName(String name){
-        
+
     }
 
     public void updateSeats() {
