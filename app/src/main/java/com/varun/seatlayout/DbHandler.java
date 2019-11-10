@@ -71,6 +71,7 @@ public class DbHandler extends SQLiteOpenHelper {
             user.put("status",cursor.getString(cursor.getColumnIndex(KEY_STATUS)));
             userList.add(user);
         }
+        cursor.close();
         return  userList;
     }
 
@@ -90,6 +91,7 @@ public class DbHandler extends SQLiteOpenHelper {
 //            String status =cursor.getString(cursor.getColumnIndex(KEY_STATUS));
             buffer.append(cid+ "   " + name + "   " + phoneNumber +"    " + seatId +"\n");
         }
+        cursor.close();
         return buffer.toString();
     }
 
@@ -104,6 +106,7 @@ public class DbHandler extends SQLiteOpenHelper {
             String phoneNumber =cursor.getString(cursor.getColumnIndex(KEY_PN));
             buffer.append(phoneNumber+"\n");
         }
+        cursor.close();
         return buffer.toString();
     }
 
@@ -125,6 +128,7 @@ public class DbHandler extends SQLiteOpenHelper {
             String status =cursor.getString(cursor.getColumnIndex(KEY_STATUS));
             buffer.append(name1 + "   " + phoneNumber1 +"   " + seatId1 +"  " + status+ "\n");
         }
+        cursor.close();
         return buffer.toString();
     }
 
@@ -139,6 +143,7 @@ public class DbHandler extends SQLiteOpenHelper {
             String seatId1 =cursor.getString(cursor.getColumnIndex(KEY_SID));
             buffer.append(seatId1 +"\n");
         }
+        cursor.close();
         return buffer.toString();
     }
 
@@ -153,6 +158,7 @@ public class DbHandler extends SQLiteOpenHelper {
             String status =cursor.getString(cursor.getColumnIndex(KEY_STATUS));
             buffer.append(status +"\n");
         }
+        cursor.close();
         return buffer.toString();
     }
 
@@ -167,6 +173,7 @@ public class DbHandler extends SQLiteOpenHelper {
             String seatId =cursor.getString(cursor.getColumnIndex(KEY_SID));
             buffer.append(seatId +" ");
         }
+        cursor.close();
         return buffer.toString();
     }
 
@@ -183,6 +190,7 @@ public class DbHandler extends SQLiteOpenHelper {
             user.put("seatId",cursor.getString(cursor.getColumnIndex(KEY_SID)));
             userList.add(user);
         }
+        cursor.close();
         return  userList;
     }
     // Delete User Details
@@ -203,6 +211,7 @@ public class DbHandler extends SQLiteOpenHelper {
 //        }
         cursor.moveToFirst();
         String name1 =cursor.getString(cursor.getColumnIndex(KEY_NAME));
+        cursor.close();
         return name1;
     }
 

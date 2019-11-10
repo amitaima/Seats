@@ -24,14 +24,17 @@ public class AlarmReceiver1 extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) { // Sending sms to all users
         myContext=context;
-        //Telling the server to send all sms messages
-        Thread sendThread = new Thread(new sendThread());
-        sendThread.start();
-//        try {
-//            sendThread.join();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        Calendar date = Calendar.getInstance();
+        int hour = date.get(Calendar.HOUR_OF_DAY);
+        int day = date.get(Calendar.DAY_OF_WEEK);
+        if (day==5 && hour==18 && MainActivity.first2==0) {
+            //Telling the server to send all sms messages
+            Thread sendThread = new Thread(new sendThread());
+            sendThread.start();
+            MainActivity.first2=1;
+            MainActivity.first3=0;
+        }
+
 
 ////        if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED))
 ////        {

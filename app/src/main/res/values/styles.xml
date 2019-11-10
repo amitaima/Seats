@@ -2,10 +2,34 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <!-- Customize your theme here. grayBlue3-->
+        <item name="colorPrimary">@color/grayBlue2</item>
+        <item name="colorPrimaryDark">@color/veryLightGray2</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/veryLiightGray</item>
+    </style>
+
+    <style name="AppThemeL" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/grayBlue3</item>
+        <item name="colorPrimaryDark">@color/grayBlue4</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/veryLiightGray</item>
+    </style>
+
+    <style name="AppThemeXL" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/grayBlue3</item>
+        <item name="colorPrimaryDark">@color/grayBlue4</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/veryLiightGray</item>
+    </style>
+
+    <style name="GrayBlueTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/grayBlue3</item>
+        <item name="colorPrimaryDark">@color/grayBlue4</item>
+        <item name="colorAccent">@color/grayBlue2</item>
+        <item name="android:windowBackground">@color/grayBlue3</item>
     </style>
 
 </resources>

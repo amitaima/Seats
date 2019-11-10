@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
     android:id="@+id/main_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -34,13 +33,7 @@
             android:layout_weight=".9"
             android:backgroundTint="@color/colorAccent"
             android:gravity="center">
-            <!--<TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:backgroundTint="@color/colorAccent"
-                android:text="Advertisment"
-                android:gravity="center"
-                android:textAlignment="center"/>-->
+
             <ImageView
                 android:id="@+id/ad1"
                 android:adjustViewBounds="true"
@@ -61,5 +54,4 @@
                 android:layout_weight="1"/>
         </LinearLayout>
     </LinearLayout>
-
 </android.support.constraint.ConstraintLayout>

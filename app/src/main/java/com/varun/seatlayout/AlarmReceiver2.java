@@ -11,6 +11,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.Calendar;
 
 public class AlarmReceiver2 extends BroadcastReceiver {
     public Socket socket;
@@ -20,48 +21,24 @@ public class AlarmReceiver2 extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         myContext=context;
-        Thread resetThread = new Thread(new resetThread());
-        resetThread.start();
-//        try {
-//            resetThread.join();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-        Toast.makeText(context, "Reseting the seats", Toast.LENGTH_LONG).show();
-        DbHandler dbHandler = new DbHandler(context);
-        int i=0;
-        for (i=0;i<MainActivity.count;i++){
-            if (!dbHandler.getNameById(i).equals("פנוי")){
-                dbHandler.UpdateUserStatus("red",i);
-                MainActivity.setPresent(i);
-            }
-        }
-    }
-
-    class resetThread implements Runnable {
-
-        @Override
-        public void run() {
-            try {
-                socket = new Socket(MainActivity.IP, MainActivity.PORT);
-                dos = new DataOutputStream(socket.getOutputStream());
-                String message;
-                message = "reset statuses";
-                String receivedMsg = "";
-                dos.writeUTF(message);
-                byte[] buffer = new byte[9];
-                is = socket.getInputStream();
-                is.read(buffer);
-                receivedMsg = new String(buffer, "UTF-8");
-                if (receivedMsg.equals("done")){
-                    Log.d("ResetStatuses", "Success");
-                    Toast.makeText(myContext, "Reset statuses", Toast.LENGTH_LONG).show();
-                } else{
-                    Log.d("ResetStatuses", "Error sending all messages");
+        Calendar date = Calendar.getInstance();
+        int hour = date.get(Calendar.HOUR_OF_DAY);
+        int day = date.get(Calendar.DAY_OF_WEEK);
+        if (day==4 && hour==11 && MainActivity.first3==0) {
+            Toast.makeText(context, "Reseting the seats", Toast.LENGTH_LONG).show();
+            DbHandler dbHandler = new DbHandler(context);
+            int i = 0;
+            String name;
+            for (i = 1; i <= MainActivity.count; i++) {
+                name = dbHandler.getNameById(i);
+                if (!name.equals("פנוי")) {
+                    dbHandler.UpdateUserStatus("red", i);
+                    MainActivity.setPresent(i);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+            MainActivity.first3=1;
+            MainActivity.first1=0;
+            MainActivity.first2=0;
         }
     }
 }

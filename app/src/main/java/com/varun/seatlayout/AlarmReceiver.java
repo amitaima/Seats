@@ -5,11 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
+import java.util.Calendar;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.Date;
 
 public class AlarmReceiver extends BroadcastReceiver {
     public Socket socket;
@@ -18,10 +20,17 @@ public class AlarmReceiver extends BroadcastReceiver {
     Context myContext;
     @Override
     public void onReceive(Context context, Intent intent) {
-        myContext=context;
-        Thread getStatusesThread = new Thread(new getStatusesThread());
-        getStatusesThread.start();
-        Toast.makeText(context, "Updating seat statuses", Toast.LENGTH_LONG).show();
+        myContext = context;
+        Log.d("ALARM", "onReceive: Very IN");
+        Calendar date = Calendar.getInstance();
+        int hour = date.get(Calendar.HOUR_OF_DAY);
+        int day = date.get(Calendar.DAY_OF_WEEK);
+        if (day == 5 && hour == 23 && MainActivity.first1 == 0) {
+            Thread getStatusesThread = new Thread(new getStatusesThread());
+            getStatusesThread.start();
+            Toast.makeText(context, "Updating seat statuses", Toast.LENGTH_LONG).show();
+            MainActivity.first1 = 1;
+//        }
 //        try {
 //            getStatusesThread.join();
 //        } catch (InterruptedException e) {
@@ -37,8 +46,8 @@ public class AlarmReceiver extends BroadcastReceiver {
 //                MainActivity.setMissing(i);
 //            }
 //        }
+        }
     }
-
     class getStatusesThread implements Runnable {
 
         @Override
@@ -57,6 +66,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                 is = socket.getInputStream();
                 is.read(bufferSize);
                 receivedMsg = new String(bufferSize, "UTF-8");
+                Log.d("getStatuses", receivedMsg);
                 byte[] buffer = new byte[Integer.parseInt(receivedMsg)];
                 message = "received num";
                 dos.writeUTF(message);
@@ -64,16 +74,16 @@ public class AlarmReceiver extends BroadcastReceiver {
                 is = socket.getInputStream();
                 is.read(buffer);
                 receivedMsg = new String(buffer, "UTF-8");
-                if (receivedMsg!=null){
+                if (receivedMsg != null) {
                     String[] statuses = receivedMsg.split(" ");
                     Log.d("getStatuses", "Received statuses");
-                    for(int i=0;i<statuses.length;i++) {
+                    for (int i = 0; i < statuses.length; i++) {
                         if (statuses[i] != "" && statuses[i] != null) {
                             dbHandler.UpdateUserStatus("green", Integer.parseInt(statuses[i]));
                             MainActivity.setMissing(Integer.parseInt(statuses[i]));
                         }
                     }
-                } else{
+                } else {
                     Log.d("getStatuses", "Error Receiving statuses");
                 }
                 socket.close();

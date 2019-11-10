@@ -19,18 +19,23 @@ import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.text.Layout;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -43,10 +48,14 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -58,6 +67,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -82,21 +92,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             + "_________________/";
 
     public String seats =
-              "____________BBBBBBB___U___/"
-            + "_______U____BBBBBBB__UUU__/"
-            + "_______UU___BBBBBBB__UUU__/"
+              "____________B___U___/"
+            + "_______U____X__UUU__/"
+            + "_______UU___X__UUU__/"
             + "______UUUA___________AUUU_/"
             + "______UUUU__AAAAAAA__AUUU_/"
             + "____________UUUUUUU_______/"
             + "AA___UUUUU__UUUUUUU__AUUUU/"
             + "AAU__UUUUA__UUUUUUU__AUUUU/"
-            + "AAUU_UUUUU__MMMMMMM__AUUUU/"
-            + "AAUU_UUUUA__MMMMMMM__AUUUU/"
-            + "____________MMMMMMM______U/"
-            + "UUUU_UUUUU__MMMMMMM__AUUUU/"
-            + "UUUU_UUUUA__MMMMMMM__AUUUU/"
-            + "A_UU_UUUUA__MMMMMMM__AUUUU/"
-            + "AA___UUUUA___________AUUUU/"
+            + "AAUU_UUUUU___________AUUUU/"
+            + "AAUU_UUUUA__X__AUUUU/"
+            + "____________X______A/"
+            + "UUUU_UUUUU__X__AUUUU/"
+            + "UUUU_UUUUA__X__AUUUU/"
+            + "A_UU_UUUUA__X__AUUUU/"
+            + "AA___UUUUA__X__AUUUU/"
             + "AA________________________/"
 //            + "__________________________/"
             + "_________AAAAAA_AAAAAAA__U/"
@@ -110,8 +120,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int seatSize = 35;
     int seatGapingH = 1;
     int seatGapingV = 0;
+    String BEIT_KNESET_NAME = "בית כנסת נחלת שי";
     DbHandler dbHandler;
-    static public final String IP = "192.168.43.43"; // Phone Router
+//    static public final String IP = "192.168.43.43"; // Phone Router
+//    static public final String IP = "10.100.102.230"; // Home Router
+    static public final String IP = "93.172.99.202"; // Home Router
     static public final int PORT = 443;
     public Socket socket;
     public DataOutputStream dos;
@@ -119,9 +132,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     int STATUS_MISSING = 1;
     int STATUS_PRESENT = 2;
+    int UPDATE_SEATS = 4;
+    int RESET_SEATS = 5;
     String selectedIds = "";
 
-    static int count, countAll, countName, countMsg;
+    String[] toWrite = {BEIT_KNESET_NAME, "שבת פרשת: ","", "", "", "", "", ""};
+    String[] toWrite2 = {BEIT_KNESET_NAME, "שבת פרשת: ","הודעות:", "", "", "", "", ""};
+    String[] defaultWrite = {BEIT_KNESET_NAME, "שבת פרשת: ","הודעות:", "", "", "", "", ""};
+    String[] noChangeText = {BEIT_KNESET_NAME, "שבת פרשת: ", "לעילוי נשמת:", "יוסף מלכה בר רחל", "רחל מלכה בת חנה", "הלנה פנקסוביץ'", "משה לייב פנקסוביץ'", ""};
+    int[] myResources = {R.id.NameText,R.id.ShabbatParasha,R.id.HeadLineText,R.id.FirstText,R.id.SecondText,R.id.ThirdText,R.id.FourthText,R.id.FifthText};
+    static int count, countAll, countX, first1,first2,first3;
+    static int backgroundCount=0, successfulConnection=0;
+    static int currentStatus=0, checkDBUpdate=0, checkDBUpdateFirst=1;
+    String statuses = "";
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -152,36 +175,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        dbHandler.UpdateUserStatus("red", 210);
         String data;
 //        Toast.makeText(this, "data: " +data, Toast.LENGTH_LONG).show();
+//        dbHandler.DeleteAll();
         data = dbHandler.getData();
         if (data.equals("")){
             insertToDB();
         }
 
 //        setAds();
+//        Calendar c = Calendar.getInstance();
+//        c.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY);
+//        c.set(Calendar.HOUR_OF_DAY, 23);
+//        c.set(Calendar.MINUTE, 43);
+//        c.set(Calendar.SECOND, 00);
+//
+//        startAlarm(c);
 
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.DAY_OF_WEEK, 6);
-        c.set(Calendar.HOUR_OF_DAY, 15);
-        c.set(Calendar.MINUTE, 15);
-        c.set(Calendar.SECOND, 0);
+//        Calendar c1 = Calendar.getInstance();
+//        c1.set(Calendar.DAY_OF_WEEK, 5);
+//        c1.set(Calendar.HOUR_OF_DAY, 18);
+//        c1.set(Calendar.MINUTE, 0);
+//        c1.set(Calendar.SECOND, 0);
+//
+//        startAlarm1(c1);
 
-        startAlarm(c);
-
-        Calendar c1 = Calendar.getInstance();
-        c1.set(Calendar.DAY_OF_WEEK, 5);
-        c1.set(Calendar.HOUR_OF_DAY, 18);
-        c1.set(Calendar.MINUTE, 0);
-        c1.set(Calendar.SECOND, 0);
-
-        startAlarm1(c1);
-
-        Calendar c2 = Calendar.getInstance();
-        c2.set(Calendar.DAY_OF_WEEK, 7);
-        c2.set(Calendar.HOUR_OF_DAY, 22);
-        c2.set(Calendar.MINUTE, 0);
-        c2.set(Calendar.SECOND, 0);
-
-        startAlarm2(c2);
+//        Calendar c2 = Calendar.getInstance();
+//        c2.set(Calendar.DAY_OF_WEEK, 7);
+//        c2.set(Calendar.HOUR_OF_DAY, 16);
+//        c2.set(Calendar.MINUTE, 50);
+//        c2.set(Calendar.SECOND, 0);
+//
+//        startAlarm2(c2);
 
         int seatHeight = (Resources.getSystem().getDisplayMetrics().heightPixels)/22;
         int seatWidth = (Resources.getSystem().getDisplayMetrics().widthPixels)/30;
@@ -191,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         layout = findViewById(R.id.layoutSeat);
 
         seats = "/" + seats;
+        float additionByScreen = getResources().getDimension(R.dimen.text_size);
 
         LinearLayout layoutSeat = new LinearLayout(this);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -198,19 +222,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         layoutSeat.setLayoutParams(params);
         layoutSeat.setPadding(6 * seatGapingH, 8 * seatGapingV, 6 * seatGapingH, 8 * seatGapingV);
         layout.addView(layoutSeat);
+        layout.setBackgroundResource(R.drawable.b7);
 
         LinearLayout layout = null;
         count=0;
         countAll=0;
-        countName=0;
-        countMsg=0;
+        countX=0;
+        int size = (seatWidth+seatGapingH+seatGapingH)*7;
+
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
         for (int index = 0; index < seats.length(); index++) {
             if (seats.charAt(index) == '/') {
                 layout = new LinearLayout(this);
                 layout.setOrientation(LinearLayout.HORIZONTAL);
                 layoutSeat.addView(layout);
-            } else if (seats.charAt(index) == 'U') {
+            }
+            else if (seats.charAt(index) == 'U') {
                 count++;
                 countAll++;
                 TextView view = new TextView(this);
@@ -224,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 view.setPadding(0, 0, 0, 0);
                 view.setId(count);
                 view.setGravity(Gravity.CENTER);
-                view.setBackgroundResource(R.drawable.ic_seats_red);
+                view.setBackgroundResource(R.drawable.ic_seats_light_red);
 //                view.setBackgroundColor(Color.RED);
                 view.setTextColor(Color.WHITE);
                 view.setTag(STATUS_PRESENT);
@@ -236,14 +264,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (name[0].split(".").length==2){view.setText(name[0].split(".")[1]);}
                     else{view.setText(name[0]);}
                 }
-
-//                view.setAutoSizeTextTypeUniformWithConfiguration(3,10,1,TypedValue.COMPLEX_UNIT_DIP);
-//                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 3, 10, 1, TypedValue.COMPLEX_UNIT_DIP);
-                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, seatWidth/13);
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    view.setAutoSizeTextTypeUniformWithConfiguration(3,12,1,TypedValue.COMPLEX_UNIT_DIP);
+//                } else{
+//                    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 3, 12, 1, TypedValue.COMPLEX_UNIT_DIP);
+//                }
+////                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, view.getTextSize()-5);
+                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, seatWidth/13 + additionByScreen); //seatWidth/13+4
                 layout.addView(view);
                 seatViewList.add(view);
                 view.setOnClickListener(this);
-            } else if (seats.charAt(index) == 'A') {
+            }
+            else if (seats.charAt(index) == 'A') {
                 count++;
                 countAll++;
                 TextView view = new TextView(this);
@@ -255,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 view.setPadding(0, 0, 0, 2 * seatGapingV);
                 view.setId(count);
                 view.setGravity(Gravity.CENTER);
-                view.setBackgroundResource(R.drawable.ic_seats_green);
+                view.setBackgroundResource(R.drawable.ic_seats_light_green);
 //                view.setBackgroundColor(Color.GREEN);
 //                view.setText(count + "");
 //                view.setText(dbHandler.getNameById(count));
@@ -267,34 +299,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 //                view.setAutoSizeTextTypeUniformWithConfiguration(3,10,1,TypedValue.COMPLEX_UNIT_DIP);
 //                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 3, 5, 1, TypedValue.COMPLEX_UNIT_DIP);
-                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, seatWidth/13);
-                view.setTextColor(Color.WHITE);
+                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, seatWidth/13 + additionByScreen); //seatWidth/13+4
+                view.setTextColor(Color.GRAY);
                 view.setTag(STATUS_MISSING);
                 layout.addView(view);
                 seatViewList.add(view);
                 view.setOnClickListener(this);
-            }else if (seats.charAt(index) == 'B' || seats.charAt(index) == 'M') {
+            }
+            else if (seats.charAt(index) == 'X') {
                 countAll++;
                 TextView view = new TextView(this);
-//                LinearLayout.LayoutParams layoutParams =
-//                        new LinearLayout.LayoutParams(seatSize+seatGapingH+seatGapingH, seatSize+seatGapingV+seatGapingV);
                 LinearLayout.LayoutParams layoutParams =
-                        new LinearLayout.LayoutParams(seatWidth+seatGapingH+seatGapingH, seatHeight+seatGapingH+seatGapingH);
-//                layoutParams.weight = 1;
+                        new LinearLayout.LayoutParams(size, seatHeight+seatGapingH+seatGapingH);
                 layoutParams.setMargins(0, 0, 0, 0);
                 view.setLayoutParams(layoutParams);
-                view.setBackgroundColor(Color.GRAY);
+//                view.setBackgroundColor(getResources().getColor(R.color.veryLiightGray));
+                view.setId(myResources[countX]);
                 view.setText("");
-                if (seats.charAt(index) == 'B') {
-                    view.setId(countName);
-                    countName++;
-                }
-                else {
-                    view.setId(countName+countMsg);
-                    countMsg++;
-                }
+                view.setTag(UPDATE_SEATS);
+                view.setTextColor(Color.GRAY);
+                view.setOnClickListener(this);
                 layout.addView(view);
-            } else if (seats.charAt(index) == '_') {
+                countX++;
+            }
+            else if (seats.charAt(index) == 'B') {
+                countAll++;
+                TextView view = new TextView(this);
+                LinearLayout.LayoutParams layoutParams =
+                        new LinearLayout.LayoutParams(size, seatHeight+seatGapingH+seatGapingH);
+                layoutParams.setMargins(0, 0, 0, 0);
+                view.setLayoutParams(layoutParams);
+//                view.setBackgroundColor(getResources().getColor(R.color.veryLiightGray));
+                view.setText("");
+                view.setTag(RESET_SEATS);
+                layout.addView(view);
+                view.setOnClickListener(this);
+            }
+            else if (seats.charAt(index) == '_') {
                 countAll++;
                 TextView view = new TextView(this);
 //                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(seatSize, seatSize);
@@ -308,36 +349,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
-        String name = "בית כנסת היכל גבריאל";
-        setName(name);
-        updateSeats();
+//        setText();
+//        updateSeats();
+//        Thread b = new Thread(new updateDbThread());
+//        b.start();
+//        try {
+//            b.join();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        Thread getStatusesThread = new Thread(new getStatusesThread());
+        getStatusesThread.start();
         Thread a = new Thread(new adsThread());
         a.start();
+//        Thread b = new Thread(new setTextThread());
+//        b.start();
+
     }
 
     public static void setMissing(int id){
-        View view = layout.findViewById(id);
-        view.setBackgroundResource(R.drawable.ic_seats_green);
-//        view.setTag(1);
+        TextView view = layout.findViewById(id);
+        view.setBackgroundResource(R.drawable.ic_seats_light_green);
+        view.setTextColor(Color.GRAY);
+        view.setTag(1);
     }
 
     public static void setPresent(int id){
-        View view = layout.findViewById(id);
-        view.setBackgroundResource(R.drawable.ic_seats_red);
-//        view.setTag(1);
+        TextView view = layout.findViewById(id);
+        view.setBackgroundResource(R.drawable.ic_seats_light_red);
+        view.setTextColor(Color.WHITE);
+        view.setTag(2);
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void startAlarm(Calendar c){
+        Log.d("ALARM", "alarm: " + Long.toString(1000 + c.getTimeInMillis()));
+//        Log.d("ALARM", "alarm: " + Long.toString(System.currentTimeMillis()));
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), 23423, intent, 0);
 
         assert alarmManager != null;
 //        alarmManager.setExact(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), 7* 24 * 60 * 60 * 1000, pendingIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis() + 20000, 7* 24 * 60 * 60 * 1000, pendingIntent);
+//        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 10000, pendingIntent);
     }
+
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -558,64 +616,157 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-//    private Timer mTimer1;
-//    private TimerTask mTt1;
-//    private Handler mTimerHandler = new Handler();
-//
-//    private void stopTimer(){
-//        if(mTimer1 != null){
-//            mTimer1.cancel();
-//            mTimer1.purge();
-//        }
-//    }
-//
-//    private void startTimer(){
-//        mTimer1 = new Timer();
-//        mTt1 = new TimerTask() {
-//            public void run() {
-//                mTimerHandler.post(new Runnable() {
-//                    public void run(){
-//                        new Thread(new getUpdate()).start();
-//                    }
-//                });
-//            }
-//        };
-//
-//        mTimer1.schedule(mTt1, 1, 60*60*1000); // every hour
-//    }
-//
-//    class getUpdate implements Runnable {
-//
-//        @Override
-//        public void run() {
-//
-//        }
-//    }
-
     @Override
     public void onClick(View view) {
-////        setMissing(view.getId());
-//        smsSendMessage("0549766185", "האם תגיע השבת לבית הכנסת? כן/לא");
-//        if ((int) view.getTag() == STATUS_MISSING) {
-//            if (selectedIds.contains(view.getId() + ",")) {
-//                selectedIds = selectedIds.replace(+view.getId() + ",", "");
-//                view.setBackgroundResource(R.drawable.ic_seats_green);
-////                view.setBackgroundColor(Color.GREEN);
-//            } else {
-//                selectedIds = selectedIds + view.getId() + ",";
-//                view.setBackgroundResource(R.drawable.ic_seats_red);
-////                view.setBackgroundColor(Color.RED);
+//        int[] backgrounds = {R.drawable.b1,R.drawable.b2,R.drawable.b3,R.drawable.b4,R.drawable.b5,R.drawable.b6,R.drawable.b7,R.drawable.b8,R.drawable.b9,R.drawable.b10, R.drawable.b11, R.drawable.b12, R.drawable.b13};
+//        backgroundCount++;
+//        if (backgroundCount>backgrounds.length-1){backgroundCount=0;}
+//        ConstraintLayout layout =(ConstraintLayout) findViewById(R.id.main_layout);
+//        layout.setBackgroundResource(backgrounds[backgroundCount]);
+//        Toast.makeText(this, dbHandler.getNameById(view.getId()), Toast.LENGTH_SHORT).show();
+        if ((int) view.getTag() == RESET_SEATS) {
+            checkDBUpdate=1;
+            Toast.makeText(this, "Checking for updates in DB", Toast.LENGTH_SHORT).show();
+        }
+//        TextView tv1 = (TextView) view;
+//        if ((int) view.getTag() == STATUS_PRESENT) {
+//            Toast.makeText(this, dbHandler.getNameById(view.getId()), Toast.LENGTH_SHORT).show();
+//            view.setTag(STATUS_MISSING);
+//            view.setBackgroundResource(R.drawable.ic_seats_light_green);
+//            tv1.setTextColor(Color.GRAY);
+//        } else if ((int) view.getTag() == UPDATE_SEATS) {
+//            Thread getStatusesThread = new Thread(new getStatusesThread());
+//            getStatusesThread.start();
+//        } else if((int) view.getTag() == RESET_SEATS) {
+//            String name;
+//            Toast.makeText(this, "Reset Statuses", Toast.LENGTH_SHORT).show();
+//            for (int i = 1; i <= count; i++) {
+//                name = dbHandler.getNameById(i);
+//                if (!name.equals("פנוי")) {
+//                    dbHandler.UpdateUserStatus("red", i);
+//                    MainActivity.setPresent(i);
+//                }
 //            }
-//        } else if ((int) view.getTag() == STATUS_PRESENT) {
-//            Toast.makeText(this, "Seat " + view.getId() + " is Taken", Toast.LENGTH_SHORT).show();
+//        } else if (!tv1.getText().equals("פנוי")){
+//            Toast.makeText(this, dbHandler.getNameById(view.getId()), Toast.LENGTH_SHORT).show();
+//            view.setTag(STATUS_PRESENT);
+//            view.setBackgroundResource(R.drawable.ic_seats_light_red);
+//            tv1.setTextColor(Color.WHITE);
 //        }
-        Toast.makeText(this, dbHandler.getNameById(view.getId()), Toast.LENGTH_SHORT).show();
+    }
+
+    class getStatusesThread implements Runnable {
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    if (checkDBUpdateFirst==1){
+                        checkDBUpdateFirst = 0;
+                        Thread c = new Thread(new updateDbThread());
+                        c.start();
+                        c.join();
+                    }
+                    Thread.sleep(1000);
+                    socket = new Socket(MainActivity.IP, MainActivity.PORT);
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    String message;
+                    message = "get statuses";
+                    String receivedMsg = "";
+                    dos.writeUTF(message);
+                    dos.flush();
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    byte[] bufferSize = new byte[2];
+                    is = socket.getInputStream();
+                    is.read(bufferSize);
+                    receivedMsg = new String(bufferSize, "UTF-8");
+                    Log.d("getStatuses", receivedMsg);
+                    byte[] buffer = new byte[Integer.parseInt(receivedMsg)];
+                    message = "received num";
+                    dos.writeUTF(message);
+                    dos.flush();
+                    is = socket.getInputStream();
+                    is.read(buffer);
+                    receivedMsg = new String(buffer, "UTF-8");
+                    if (receivedMsg != null) {
+                        if (!receivedMsg.equals(statuses)) {
+                            statuses = receivedMsg;
+                            final Semaphore mutex = new Semaphore(0);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    String name;
+                                    for (int i = 1; i <= count; i++) {
+                                        name = dbHandler.getNameById(i);
+                                        if (!name.equals("פנוי")) {
+                                            dbHandler.UpdateUserStatus("red", i);
+                                            MainActivity.setPresent(i);
+                                        }
+                                    }
+                                    mutex.release();
+                                }
+                            });
+                            try {
+                                mutex.acquire();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            String[] statuses = receivedMsg.split(" ");
+                            Log.d("getStatuses", "Received statuses");
+                            for (int i = 0; i < statuses.length; i++) {
+                                if (statuses[i] != "" && statuses[i] != null) {
+                                    dbHandler.UpdateUserStatus("green", Integer.parseInt(statuses[i]));
+                                    currentStatus = Integer.parseInt(statuses[i]);
+//                            setMissing(Integer.parseInt(statuses[i]));
+                                    final Semaphore mutex1 = new Semaphore(0);
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            setMissing(currentStatus);
+                                            mutex1.release();
+                                        }
+                                    });
+                                    try {
+                                        mutex1.acquire();
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+//                                MainActivity.setMissing(Integer.parseInt(statuses[i]));
+                                }
+                            }
+                        }
+                    } else {
+                        Log.d("getStatuses", "Error Receiving statuses");
+                    }
+                    socket.close();
+                    Thread b = new Thread(new setTextThread());
+                    b.start();
+                    b.join();
+                    if (checkDBUpdate==1){
+                        checkDBUpdate = 0;
+                        Thread c = new Thread(new updateDbThread());
+                        c.start();
+                        c.join();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    Thread.sleep(14000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public void insertToDB(){
         BufferedReader reader;
         String[] splitedLine;
         String name,phoneNumber,seatId;
+        dbHandler.DeleteAll();
         try{
             final InputStream file = getAssets().open("Users.txt");
             reader = new BufferedReader(new InputStreamReader(file));
@@ -639,9 +790,342 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void setName(String name){
-
+    public void insertToDBUpdated(String[] users){
+        String name,phoneNumber,seatId;
+        String[] splitedLine;
+        dbHandler.DeleteAll();
+        for (int i=0; i<users.length; i++){
+            if (i>0){
+                if (users[i].equals(users[0])){
+                    break;
+                }
+            }
+            splitedLine = users[i].split(" "); //\\\s+
+            if (splitedLine.length == 3){
+                name = splitedLine[1];
+                if (name.equals("פנוי")){
+//                    setMissing(Integer.parseInt(seatId));
+                    phoneNumber = "0000000000";
+                } else {
+                    phoneNumber = "+" + splitedLine[2];
+                }
+                seatId = splitedLine[0];
+                dbHandler.insertUserDetails(name,phoneNumber,seatId, "red");
+                setNewUsers(Integer.parseInt(seatId), name);
+            } else {
+                name = splitedLine[1] + " " + splitedLine[2];
+                if (name.equals("פנוי")){
+//                    setMissing(Integer.parseInt(seatId));
+                    phoneNumber = "0000000000";
+                } else {
+                    phoneNumber = "+" + splitedLine[3];
+                }
+                seatId = splitedLine[0];
+                dbHandler.insertUserDetails(name,phoneNumber,seatId, "red");
+                setNewUsers(Integer.parseInt(seatId), name);
+            }
+        }
     }
+
+    public void setNewUsers(int id, String name){
+        TextView view = layout.findViewById(id);
+        view.setText(dbHandler.getNameById(id));
+        if (name.equals("פנוי")){
+            view.setBackgroundResource(R.drawable.ic_seats_light_green);
+            view.setTextColor(Color.GRAY);
+            view.setTag(1);
+        } else {
+            view.setBackgroundResource(R.drawable.ic_seats_light_red);
+            view.setTextColor(Color.WHITE);
+            view.setTag(2);
+        }
+    }
+
+    public void setText(int turn) {
+        String[] thisTurn = noChangeText;
+        if (successfulConnection==0){
+            Toast.makeText(this, "Could not connect to the server\nPlease check your internet connection and try again.", Toast.LENGTH_LONG).show();
+        }
+        if (turn==1 && successfulConnection==1){
+            thisTurn = toWrite;
+        } else if (turn==2 && successfulConnection==1) {
+            thisTurn = toWrite2;
+        } else{
+            thisTurn = noChangeText;
+        }
+        Log.d("MainActivity", "setName: countX: " + countX);
+        for (int i=0;i<countX;i++) {
+            TextView view = layout.findViewById(myResources[i]);
+            view.setText(thisTurn[i]);
+            view.setGravity(Gravity.CENTER);
+            if (i<=2){
+                view.setTypeface(null, Typeface.BOLD);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                view.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                view.setAutoSizeTextTypeUniformWithConfiguration(8, 14, 1, TypedValue.COMPLEX_UNIT_DIP);
+            } else {
+                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 8, 14, 1, TypedValue.COMPLEX_UNIT_DIP);
+            }
+        }
+    }
+
+    int turn=0;
+    String[] messages;
+    class setTextThread implements Runnable {
+
+        @Override
+        public void run() {
+//            while (true){
+            if(turn==2) {
+                if (toWrite2[3].equals("")) {
+                    turn = 0;
+                    Log.d("BLABLA", "run: TESTING went insidde + " + turn);
+                }
+            }
+            if(turn==0){
+                try {
+    //                    socket = new Socket(IP, PORT);
+                    socket = new Socket();
+                    socket.connect(new InetSocketAddress(IP, PORT), 5000);
+                    socket.setSoTimeout(5000);
+                    if (socket == null) {
+    //                        Toast.makeText(getBaseContext(), "Could not connect to the server\nPlease check your internet connection and try again.", Toast.LENGTH_LONG).show();
+                        successfulConnection = 0;
+                        return;
+                    }
+                    successfulConnection = 1;
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    String message;
+                    if (toWrite[2].equals("")) {
+                        message = "get messages new";
+                    } else {
+                        message = "get messages";
+                    }
+                    String receivedMsg = "";
+                    dos.writeUTF(message);
+                    dos.flush();
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    byte[] bufferSize = new byte[3];
+                    is = socket.getInputStream();
+                    is.read(bufferSize);
+                    receivedMsg = new String(bufferSize, "UTF-8");
+                    if (!receivedMsg.equals("000")) {
+                        byte[] buffer = new byte[Integer.parseInt(receivedMsg)];
+                        message = "received num";
+                        dos.writeUTF(message);
+                        dos.flush();
+                        is = socket.getInputStream();
+                        is.read(buffer);
+                        receivedMsg = new String(buffer, "UTF-8");
+                        if (receivedMsg != null) {
+                            messages = receivedMsg.split("\n");
+                            Log.d("getMessages", "Received messages: " + receivedMsg);
+//                            toWrite = defaultWrite;
+//                            toWrite2 = defaultWrite;
+                            toWrite[3] = "";
+                            toWrite[4] = "";
+                            toWrite[5] = "";
+                            toWrite[6] = "";
+                            toWrite[7] = "";
+                            toWrite2[3] = "";
+                            toWrite2[4] = "";
+                            toWrite2[5] = "";
+                            toWrite2[6] = "";
+                            toWrite2[7] = "";
+                            final Semaphore mutex = new Semaphore(0);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    for (int z = 1; z < messages.length; z++) {
+                                        if (z == 1) {
+                                            toWrite[z] = "שבת פרשת: " + messages[z - 1];
+                                            noChangeText[z] = toWrite[z];
+                                        } else if (z > 7) {
+                                            if (z == 8) {
+                                                toWrite2[1] = "שבת פרשת: " + messages[0];
+                                            }
+                                            toWrite2[z - 5] = messages[z - 1];
+                                        } else {
+                                            toWrite[z] = messages[z - 1];
+                                        }
+                                        if (messages[z].equals(messages[0])) {
+                                            break;
+                                        }
+                                    }
+                                    mutex.release();
+                                }
+                            });
+                            try {
+                                mutex.acquire();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Log.d("getMessages", "Error Receiving messages");
+                        }
+                        socket.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            final Semaphore mutex = new Semaphore(0);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setText(turn);
+                    mutex.release();
+                }
+            });
+            try {
+                mutex.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            turn++;
+            if (turn==3){turn=0;}
+//                try {
+//                    Thread.sleep(60000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+        }
+    }
+//    }
+
+    class updateDbThread implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(IP,PORT),5000);
+                socket.setSoTimeout(5000);
+                if (socket == null) {
+                    successfulConnection = 0;
+                    return;
+                }
+                successfulConnection=1;
+                dos = new DataOutputStream(socket.getOutputStream());
+                String message;
+                message = "get updates";
+                String receivedMsg = "";
+                dos.writeUTF(message);
+                dos.flush();
+                dos = new DataOutputStream(socket.getOutputStream());
+                is = socket.getInputStream();
+                byte[] buffer, bufferLen;
+                String receivedMsgLong = "";
+                while (true) {
+                    bufferLen = new byte[1];
+                    is.read(bufferLen);
+                    receivedMsg = new String(bufferLen, "UTF-8");
+                    Log.d("getUpdates", "Received 1: " + receivedMsg);
+                    if (receivedMsg.equals("0")) {
+                        dos.writeUTF("recieved");
+                        dos.flush();
+                        break;
+                    }
+                    bufferLen = new byte[Integer.parseInt(receivedMsg)];
+                    dos.writeUTF("recieved");
+                    dos.flush();
+                    is.read(bufferLen);
+                    receivedMsg = new String(bufferLen, "UTF-8");
+                    Log.d("getUpdates", "Received 2: " + receivedMsg);
+                    buffer = new byte[Integer.parseInt(receivedMsg)];
+                    dos.writeUTF("recieved");
+                    dos.flush();
+                    is.read(buffer);
+                    receivedMsg = new String(buffer, "UTF-8");
+                    receivedMsgLong += receivedMsg;
+                    Log.i("Receiving users", Integer.toString(receivedMsg.length()));
+                    dos.writeUTF("recieved");
+                    dos.flush();
+                }
+                if (receivedMsg != null) {
+                    messages = receivedMsgLong.split("\n");
+                    Log.d("getUpdates", "Received updates: " + messages.length);
+                    Log.d("getUpdates", "Received updates: " + messages[208]);
+                    final Semaphore mutex = new Semaphore(0);
+                    runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                insertToDBUpdated(messages);
+//                                try {
+//                                    for (int z = 1; z < messages.length-1; z++) {
+//                                        if (messages[z].equals(messages[0])){
+//                                            break;
+//                                        } else {
+//                                            pw.append(messages[z - 1]);
+//                                        }
+//                                    }
+//                                } catch (FileNotFoundException e) {
+//                                    e.printStackTrace();
+//                                }
+                                mutex.release();
+                            }
+                    });
+                    try {
+                        mutex.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Log.d("getUpdates", "Error Receiving updates");
+                }
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+//    if (!receivedMsg.equals("0000")) {
+//        byte[] buffer = new byte[Integer.parseInt(receivedMsg)];
+//        message = "received updates";
+//        dos.writeUTF(message);
+//        dos.flush();
+//        is = socket.getInputStream();
+//        is.read(buffer);
+//        receivedMsg = new String(buffer, "UTF-8");
+//        if (receivedMsg != null) {
+//            messages = receivedMsg.split("\n");
+//            Log.d("getUpdates", "Received updates: " + receivedMsg);
+//            final Semaphore mutex = new Semaphore(0);
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+////                                    new PrintWriter("Users1.txt").close();
+//                        FileOutputStream otpFile = new FileOutputStream("Users1.txt", true);
+//                        PrintWriter pw = new PrintWriter(otpFile);
+//                        pw.write("");
+//                        for (int z = 1; z < messages.length-1; z++) {
+//                            if (messages[z].equals(messages[0])){
+//                                break;
+//                            } else {
+//                                pw.append(messages[z - 1]);
+//                            }
+//                        }
+//                        insertToDB();
+//                    } catch (FileNotFoundException e) {
+//                        e.printStackTrace();
+//                    }
+//                    mutex.release();
+//                }
+//            });
+//            try {
+//                mutex.acquire();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        } else {
+//            Log.d("getUpdates", "Error Receiving updates");
+//        }
+//    }
 
     public void updateSeats() {
         DbHandler dbHandler = new DbHandler(this);
@@ -674,7 +1158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Timer mTimer1;
     private TimerTask mTt1;
     private Handler mTimerHandler = new Handler();
-    int i=0;
+    int x=0;
 
     /*@Override
     public void onDestroy() {
@@ -721,13 +1205,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ad1.setImageResource(ads[i]);
-                        ad2.setImageResource(ads[i+1]);
+                        ad1.setImageResource(ads[x]);
+                        ad2.setImageResource(ads[x+1]);
                         ad3.setImageResource(ads[3]);
                     }
                 });
-                i++;
-                if (i==2){i=0;}
+                x++;
+                if (x==2){x=0;}
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {

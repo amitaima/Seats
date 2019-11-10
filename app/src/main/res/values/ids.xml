@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="NameText" type="id"></item>
+    <item name="ShabbatParasha" type="id"></item>
+    <item name="HeadLineText" type="id"></item>
+    <item name="FirstText" type="id"></item>
+    <item name="SecondText" type="id"></item>
+    <item name="ThirdText" type="id"></item>
+    <item name="FourthText" type="id"></item>
+    <item name="FifthText" type="id"></item>
+</resources>
