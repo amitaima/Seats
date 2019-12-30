@@ -54,4 +54,13 @@
                 android:layout_weight="1"/>
         </LinearLayout>
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/contentFrame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteY="8dp"
+        tools:layout_editor_absoluteX="8dp">
+    </FrameLayout>
+
 </android.support.constraint.ConstraintLayout>

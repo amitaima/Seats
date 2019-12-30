@@ -3,6 +3,9 @@ package com.varun.seatlayout;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -74,24 +77,30 @@ import java.util.stream.Stream;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     static ViewGroup layout;
 
-    String seats2 = "_UUUUUUAAAAARRRR_/"
-            + "_________________/"
-            + "UU__AAAARRRRR__RR/"
-            + "UU__UUUAAAAAA__AA/"
-            + "AA__AAAAAAAAA__AA/"
-            + "AA__AARUUUURR__AA/"
-            + "UU__UUUA_RRRR__AA/"
-            + "AA__AAAA_RRAA__UU/"
-            + "AA__AARR_UUUU__RR/"
-            + "AA__UUAA_UURR__RR/"
-            + "_________________/"
-            + "UU_AAAAAAAUUUU_RR/"
-            + "RR_AAAAAAAAAAA_AA/"
-            + "AA_UUAAAAAUUUU_AA/"
-            + "AA_AAAAAAUUUUU_AA/"
-            + "_________________/";
-
     public String seats =
+            "____________B___U___/"
+                    + "_______U____X__UUU__/"
+                    + "_______UU___X__UUU__/"
+                    + "______UUUA___________AUUU_/"
+                    + "______UUUU__AAAAAAA__AUUU_/"
+                    + "____________UUUUUUU_______/"
+                    + "AA___UUUUU__UUUUUUU__AUUUU/"
+                    + "AAU__UUUUA__UUUUUUU__AUUUU/"
+                    + "AAUU_UUUUU___________AUUUU/"
+                    + "AAUU_UUUUA__X__AUUUU/"
+                    + "____________X______A/"
+                    + "UUUU_UUUUU__X__AUUUU/"
+                    + "UUUU_UUUUA__X__AUUUU/"
+                    + "A_UU_UUUUA__X__AUUUU/"
+                    + "AA___UUUUA__X__AUUUU/"
+                    + "AA________________________/"
+//            + "__________________________/"
+                    + "_________AAAAAA_AAAAAAA__U/"
+                    + "_________UUUUUU_UUUUUUU_U_/"
+                    + "__________UUUUU_UUUUUU____/"
+                    + "___________UUUUUUUUU______/";
+
+    public String seats1 =
               "____________B___U___/"
             + "_______U____X__UUU__/"
             + "_______UU___X__UUU__/"
@@ -114,17 +123,67 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             + "__________UUUUU_UUUUUU____/"
             + "___________UUUUUUUUU______/";
 
+    public String seats2 =
+            "____________B___U___/"
+                    + "_______U____X__UUU__/"
+                    + "_______UU___X__UUU__/"
+                    + "______UUUA___________AUUU_/"
+                    + "______UUUU__AAAAAAA__AUUU_/"
+                    + "____________UUUUUUU_______/"
+                    + "AA___UUUUU__UUUUUUU__AUUUU/"
+                    + "AAU__UUUUA__UUUUUUU__AUUUU/"
+                    + "AAUU_UUUUU___________AUUUU/"
+                    + "AAUU_UUUUA__X__AUUUU/"
+                    + "____________X______A/"
+                    + "UUUU_UUUUU__X__AUUUU/"
+                    + "UUUU_UUUUA__X__AUUUU/"
+                    + "A_UU_UUUUA__X__AUUUU/"
+                    + "AA___UUUUA__X__AUUUU/"
+                    + "AA________________________/"
+//            + "__________________________/"
+                    + "_________AAAAAA_AAAAAAA__U/"
+                    + "_________UUUUUU_UUUUUUU_U_/"
+                    + "__________UUUUU_UUUUUU____/"
+                    + "___________UUUUUUUUU______/";
+
+    public String seats3 =
+            "____________B___U___/"
+                    + "_______U____X__UUU__/"
+                    + "_______UU___X__UUU__/"
+                    + "______UUUA___________AUUU_/"
+                    + "______UUUU__AAAAAAA__AUUU_/"
+                    + "____________UUUUUUU_______/"
+                    + "AA___UUUUU__UUUUUUU__AUUUU/"
+                    + "AAU__UUUUA__UUUUUUU__AUUUU/"
+                    + "AAUU_UUUUU___________AUUUU/"
+                    + "AAUU_UUUUA__X__AUUUU/"
+                    + "____________X______A/"
+                    + "UUUU_UUUUU__X__AUUUU/"
+                    + "UUUU_UUUUA__X__AUUUU/"
+                    + "A_UU_UUUUA__X__AUUUU/"
+                    + "AA___UUUUA__X__AUUUU/"
+                    + "AA________________________/"
+//            + "__________________________/"
+                    + "_________AAAAAA_AAAAAAA__U/"
+                    + "_________UUUUUU_UUUUUUU_U_/"
+                    + "__________UUUUU_UUUUUU____/"
+                    + "___________UUUUUUUUU______/";
+
     List<TextView> seatViewList = new ArrayList<>();
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 1;
     private static final int MY_PERMISSIONS_REQUEST_RECEIVE_SMS = 1;
     int seatSize = 35;
     int seatGapingH = 1;
     int seatGapingV = 0;
-    String BEIT_KNESET_NAME = "בית כנסת נחלת שי";
+    static int BEIT_KNESET_NUMBER = 0;
+    String BEIT_KNESET_NAME = "";
+    String BEIT_KNESET_NAME1 = "בית כנסת נחלת שי";
+    String BEIT_KNESET_NAME2 = "בית כנסת היכל שלמה";
+    String BEIT_KNESET_NAME3 = "בית כנסת המלך דוד";
     DbHandler dbHandler;
 //    static public final String IP = "192.168.43.43"; // Phone Router
-//    static public final String IP = "10.100.102.230"; // Home Router
-    static public final String IP = "93.172.99.202"; // Home Router
+//    static public final String IP = "89.139.205.95"; // Home Router
+    static public final String IP = "myseatingapp.ddns.net"; // Home Router
     static public final int PORT = 443;
     public Socket socket;
     public DataOutputStream dos;
@@ -135,6 +194,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int UPDATE_SEATS = 4;
     int RESET_SEATS = 5;
     String selectedIds = "";
+
+
 
     String[] toWrite = {BEIT_KNESET_NAME, "שבת פרשת: ","", "", "", "", "", ""};
     String[] toWrite2 = {BEIT_KNESET_NAME, "שבת פרשת: ","הודעות:", "", "", "", "", ""};
@@ -175,43 +236,244 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        dbHandler.UpdateUserStatus("red", 210);
         String data;
 //        Toast.makeText(this, "data: " +data, Toast.LENGTH_LONG).show();
-//        dbHandler.DeleteAll();
+        dbHandler.DeleteAll();
         data = dbHandler.getData();
         if (data.equals("")){
             insertToDB();
         }
+        layout = findViewById(R.id.layoutSeat);
+        SharedPreferences prefs = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        Toast.makeText(this, "saved: " + prefs.getInt("BeitKnesetNumber",0), Toast.LENGTH_LONG).show();
+        if (prefs.getBoolean("isLoginKey",false)){
+            BEIT_KNESET_NUMBER = prefs.getInt("BeitKnesetNumber",0);
+        }else{
+            replaceFragment();
+        }
+//        if (getSharedPreferences("loginPrefs",MODE_PRIVATE).getBoolean("isLoginKey",false)){
+//            Log.d("TEST", "onCreate: saved password! number: " + getSharedPreferences("loginPrefs",MODE_PRIVATE).getInt("BeitKnesetNumber",0));
+//        }
+//        replaceFragment();
 
-//        setAds();
-//        Calendar c = Calendar.getInstance();
-//        c.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY);
-//        c.set(Calendar.HOUR_OF_DAY, 23);
-//        c.set(Calendar.MINUTE, 43);
-//        c.set(Calendar.SECOND, 00);
-//
-//        startAlarm(c);
+//        BEIT_KNESET_NUMBER=1;
 
-//        Calendar c1 = Calendar.getInstance();
-//        c1.set(Calendar.DAY_OF_WEEK, 5);
-//        c1.set(Calendar.HOUR_OF_DAY, 18);
-//        c1.set(Calendar.MINUTE, 0);
-//        c1.set(Calendar.SECOND, 0);
+//        if (BEIT_KNESET_NUMBER == 1){
+//            BEIT_KNESET_NAME = BEIT_KNESET_NAME1;
+//            seats = seats1;
+//        } else if (BEIT_KNESET_NUMBER==2){
+//            BEIT_KNESET_NAME = BEIT_KNESET_NAME2;
+//            seats = seats2;
+//        } else if(BEIT_KNESET_NUMBER==3){
+//            BEIT_KNESET_NAME = BEIT_KNESET_NAME3;
+//            seats = seats3;
+//        }
 //
-//        startAlarm1(c1);
+//        int seatHeight = (Resources.getSystem().getDisplayMetrics().heightPixels)/22;
+//        int seatWidth = (Resources.getSystem().getDisplayMetrics().widthPixels)/30;
+//        Log.e("Screen size", String.valueOf(Resources.getSystem().getDisplayMetrics().heightPixels));
+//        Log.e("Screen size", String.valueOf(Resources.getSystem().getDisplayMetrics().heightPixels/24));
+//
+//        layout = findViewById(R.id.layoutSeat);
+//
+//        seats = "/" + seats;
+//        float additionByScreen = getResources().getDimension(R.dimen.text_size);
+//
+//        LinearLayout layoutSeat = new LinearLayout(this);
+//        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        layoutSeat.setOrientation(LinearLayout.VERTICAL);
+//        layoutSeat.setLayoutParams(params);
+//        layoutSeat.setPadding(6 * seatGapingH, 8 * seatGapingV, 6 * seatGapingH, 8 * seatGapingV);
+//        layout.addView(layoutSeat);
+//        layout.setBackgroundResource(R.drawable.b7);
+//
+//        LinearLayout layout = null;
+//        count=0;
+//        countAll=0;
+//        countX=0;
+//        int size = (seatWidth+seatGapingH+seatGapingH)*7;
+//
+//        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+//
+//        for (int index = 0; index < seats.length(); index++) {
+//            if (seats.charAt(index) == '/') {
+//                layout = new LinearLayout(this);
+//                layout.setOrientation(LinearLayout.HORIZONTAL);
+//                layoutSeat.addView(layout);
+//            }
+//            else if (seats.charAt(index) == 'U') {
+//                count++;
+//                countAll++;
+//                TextView view = new TextView(this);
+////                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(seatSize, seatSize);
+//                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(seatWidth, seatHeight);
+////                layoutParams.weight = 1;
+//                layoutParams.setMargins(seatGapingH, seatGapingV, seatGapingH, seatGapingV);
+//                view.setLayoutParams(layoutParams);
+//                view.setTypeface(null, Typeface.BOLD);
+////                view.setPadding(0, 0, 0, 2 * seatGapingV);
+//                view.setPadding(0, 0, 0, 0);
+//                view.setId(count);
+//                view.setGravity(Gravity.CENTER);
+//                view.setBackgroundResource(R.drawable.ic_seats_light_red);
+////                view.setBackgroundColor(Color.RED);
+//                view.setTextColor(Color.WHITE);
+//                view.setTag(STATUS_PRESENT);
+////                view.setText(count + "");
+////                view.setText("מלכה");
+//                String name[] = dbHandler.getNameById(count).split(" ");
+//                if(name.length==2){view.setText(name[1]);}
+//                else {
+//                    if (name[0].split(".").length==2){view.setText(name[0].split(".")[1]);}
+//                    else{view.setText(name[0]);}
+//                }
+////                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+////                    view.setAutoSizeTextTypeUniformWithConfiguration(3,12,1,TypedValue.COMPLEX_UNIT_DIP);
+////                } else{
+////                    TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 3, 12, 1, TypedValue.COMPLEX_UNIT_DIP);
+////                }
+//////                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, view.getTextSize()-5);
+//                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, seatWidth/13 + additionByScreen); //seatWidth/13+4
+//                layout.addView(view);
+//                seatViewList.add(view);
+//                view.setOnClickListener(this);
+//            }
+//            else if (seats.charAt(index) == 'A') {
+//                count++;
+//                countAll++;
+//                TextView view = new TextView(this);
+////                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(seatSize, seatSize);
+//                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(seatWidth, seatHeight);
+////                layoutParams.weight = 1;
+//                layoutParams.setMargins(seatGapingH, seatGapingV, seatGapingH, seatGapingV);
+//                view.setLayoutParams(layoutParams);
+//                view.setPadding(0, 0, 0, 2 * seatGapingV);
+//                view.setId(count);
+//                view.setGravity(Gravity.CENTER);
+//                view.setBackgroundResource(R.drawable.ic_seats_light_green);
+////                view.setBackgroundColor(Color.GREEN);
+////                view.setText(count + "");
+////                view.setText(dbHandler.getNameById(count));
+//                String name[] = dbHandler.getNameById(count).split(" ");
+//                if(name.length==2){view.setText(name[1]);}
+//                else {
+//                    if (name[0].split(".").length==2){view.setText(name[0].split(".")[1]);}
+//                    else{view.setText(name[0]);}
+//                }
+////                view.setAutoSizeTextTypeUniformWithConfiguration(3,10,1,TypedValue.COMPLEX_UNIT_DIP);
+////                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 3, 5, 1, TypedValue.COMPLEX_UNIT_DIP);
+//                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, seatWidth/13 + additionByScreen); //seatWidth/13+4
+//                view.setTextColor(Color.GRAY);
+//                view.setTag(STATUS_MISSING);
+//                layout.addView(view);
+//                seatViewList.add(view);
+//                view.setOnClickListener(this);
+//            }
+//            else if (seats.charAt(index) == 'X') {
+//                countAll++;
+//                TextView view = new TextView(this);
+//                LinearLayout.LayoutParams layoutParams =
+//                        new LinearLayout.LayoutParams(size, seatHeight+seatGapingH+seatGapingH);
+//                layoutParams.setMargins(0, 0, 0, 0);
+//                view.setLayoutParams(layoutParams);
+////                view.setBackgroundColor(getResources().getColor(R.color.veryLiightGray));
+//                view.setId(myResources[countX]);
+//                view.setText("");
+//                view.setTag(UPDATE_SEATS);
+//                view.setTextColor(Color.GRAY);
+//                view.setOnClickListener(this);
+//                layout.addView(view);
+//                countX++;
+//            }
+//            else if (seats.charAt(index) == 'B') {
+//                countAll++;
+//                TextView view = new TextView(this);
+//                LinearLayout.LayoutParams layoutParams =
+//                        new LinearLayout.LayoutParams(size, seatHeight+seatGapingH+seatGapingH);
+//                layoutParams.setMargins(0, 0, 0, 0);
+//                view.setLayoutParams(layoutParams);
+////                view.setBackgroundColor(getResources().getColor(R.color.veryLiightGray));
+//                view.setText("");
+//                view.setTag(RESET_SEATS);
+//                layout.addView(view);
+//                view.setOnClickListener(this);
+//            }
+//            else if (seats.charAt(index) == '_') {
+//                countAll++;
+//                TextView view = new TextView(this);
+////                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(seatSize, seatSize);
+//                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(seatWidth, seatHeight);
+////                layoutParams.weight = 1;
+//                layoutParams.setMargins(seatGapingH, seatGapingV, seatGapingH, seatGapingV);
+//                view.setLayoutParams(layoutParams);
+//                view.setBackgroundColor(Color.TRANSPARENT);
+//                view.setText("");
+//                layout.addView(view);
+//            }
+//        }
+//
+//        Thread getStatusesThread = new Thread(new getStatusesThread());
+//        getStatusesThread.start();
+//        Thread a = new Thread(new adsThread());
+//        a.start();
+        Thread setup = new Thread(new setupThread());
+        setup.start();
+    }
 
-//        Calendar c2 = Calendar.getInstance();
-//        c2.set(Calendar.DAY_OF_WEEK, 7);
-//        c2.set(Calendar.HOUR_OF_DAY, 16);
-//        c2.set(Calendar.MINUTE, 50);
-//        c2.set(Calendar.SECOND, 0);
-//
-//        startAlarm2(c2);
+    class setupThread implements Runnable {
+
+        @Override
+        public void run() {
+            while (BEIT_KNESET_NUMBER==0) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            final Semaphore mutex = new Semaphore(0);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setSeats();
+                    mutex.release();
+                }
+            });
+            try {
+                mutex.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    boolean replaceFragment(){
+        Fragment myFragment = new LoginFragment();
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.contentFrame, myFragment);
+        fragmentTransaction.addToBackStack(myFragment.toString());
+        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        fragmentTransaction.commit();
+        return true;
+    }
+
+    public void setSeats(){
+        if (BEIT_KNESET_NUMBER == 1){
+            BEIT_KNESET_NAME = BEIT_KNESET_NAME1;
+            seats = seats1;
+        } else if (BEIT_KNESET_NUMBER==2){
+            BEIT_KNESET_NAME = BEIT_KNESET_NAME2;
+            seats = seats2;
+        } else if(BEIT_KNESET_NUMBER==3){
+            BEIT_KNESET_NAME = BEIT_KNESET_NAME3;
+            seats = seats3;
+        }
 
         int seatHeight = (Resources.getSystem().getDisplayMetrics().heightPixels)/22;
         int seatWidth = (Resources.getSystem().getDisplayMetrics().widthPixels)/30;
         Log.e("Screen size", String.valueOf(Resources.getSystem().getDisplayMetrics().heightPixels));
         Log.e("Screen size", String.valueOf(Resources.getSystem().getDisplayMetrics().heightPixels/24));
 
-        layout = findViewById(R.id.layoutSeat);
+//        layout = findViewById(R.id.layoutSeat);
 
         seats = "/" + seats;
         float additionByScreen = getResources().getDimension(R.dimen.text_size);
@@ -252,7 +514,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 view.setPadding(0, 0, 0, 0);
                 view.setId(count);
                 view.setGravity(Gravity.CENTER);
-                view.setBackgroundResource(R.drawable.ic_seats_light_red);
+                view.setBackgroundResource(R.drawable.ic_seats_light_red1);
 //                view.setBackgroundColor(Color.RED);
                 view.setTextColor(Color.WHITE);
                 view.setTag(STATUS_PRESENT);
@@ -349,22 +611,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
-//        setText();
-//        updateSeats();
-//        Thread b = new Thread(new updateDbThread());
-//        b.start();
-//        try {
-//            b.join();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
         Thread getStatusesThread = new Thread(new getStatusesThread());
         getStatusesThread.start();
         Thread a = new Thread(new adsThread());
         a.start();
-//        Thread b = new Thread(new setTextThread());
-//        b.start();
-
     }
 
     public static void setMissing(int id){
@@ -376,94 +626,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static void setPresent(int id){
         TextView view = layout.findViewById(id);
-        view.setBackgroundResource(R.drawable.ic_seats_light_red);
+        view.setBackgroundResource(R.drawable.ic_seats_light_red1);
         view.setTextColor(Color.WHITE);
         view.setTag(2);
     }
-
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void startAlarm(Calendar c){
-        Log.d("ALARM", "alarm: " + Long.toString(1000 + c.getTimeInMillis()));
-//        Log.d("ALARM", "alarm: " + Long.toString(System.currentTimeMillis()));
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), 23423, intent, 0);
-
-        assert alarmManager != null;
-//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis() + 20000, 7* 24 * 60 * 60 * 1000, pendingIntent);
-//        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 10000, pendingIntent);
-    }
-
-
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void startAlarm1(Calendar c1){
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlarmReceiver1.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 2, intent, 0);
-
-        assert alarmManager != null;
-//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, c1.getTimeInMillis(), pendingIntent);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c1.getTimeInMillis(), 7* 24 * 60 * 60 * 1000, pendingIntent);
-    }
-
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void startAlarm2(Calendar c2){
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlarmReceiver2.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 3, intent, 0);
-
-        assert alarmManager != null;
-//        alarmManager.setExact(AlarmManager.RTC_WAKEUP, c2.getTimeInMillis(), pendingIntent);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c2.getTimeInMillis(), 7* 24 * 60 * 60 * 1000, pendingIntent);
-    }
-
-//    public class AlertReceiver extends BroadcastReceiver {
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            Toast.makeText(context, "Pulling new data", Toast.LENGTH_LONG).show();
-//            // Get all the new data from the DataBase and update the list
-//        }
-//    }
-
-//    public class AlertReceiver1 extends BroadcastReceiver {
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) { // Sending sms to all users
-//            String msg = "האם תגיע השבת לבית הכנסת? כן/לא";
-//            String data = dbHandler.getPhoneNumbers();
-//            String[] phoneNumbers = data.split("\n");
-//            LinkedHashSet<String> lhSetColors =
-//                    new LinkedHashSet<String>(Arrays.asList(phoneNumbers)); // removes duplicate numbers
-//            //create array from the LinkedHashSet
-//            String[] noDuplicatePN = lhSetColors.toArray(new String[ lhSetColors.size() ]);
-////            for(int i=0; i<noDuplicatePN.length;i++){
-////                smsSendMessage(noDuplicatePN[i], msg);
-////            }
-//            Log.d("alertReciever", noDuplicatePN[0] + " " + noDuplicatePN[1]);
-//            Toast.makeText(context, noDuplicatePN[0] + " " + noDuplicatePN[1], Toast.LENGTH_LONG).show();
-//        }
-//    }
-
-//    public class AlertReceiver2 extends BroadcastReceiver {
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            Toast.makeText(context, "Reseting the seats", Toast.LENGTH_LONG).show();
-//            int i=0;
-//            for (i=0;i<count;i++){
-////                layout.findViewById(i).setTag(STATUS_PRESENT);
-////                layout.findViewById(i).setBackgroundResource(R.drawable.ic_seats_red);
-//                View view = layout.findViewById(i);
-//                view.setBackgroundResource(R.drawable.ic_seats_green);
-//            }
-////            layout.notifyAll();
-//        }
-//    }
 
     public static void smsSendMessage(String phoneNumber, String msg) {
         // Phone number of user.
@@ -624,10 +790,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        ConstraintLayout layout =(ConstraintLayout) findViewById(R.id.main_layout);
 //        layout.setBackgroundResource(backgrounds[backgroundCount]);
 //        Toast.makeText(this, dbHandler.getNameById(view.getId()), Toast.LENGTH_SHORT).show();
-        if ((int) view.getTag() == RESET_SEATS) {
-            checkDBUpdate=1;
-            Toast.makeText(this, "Checking for updates in DB", Toast.LENGTH_SHORT).show();
-        }
+//        if ((int) view.getTag() == RESET_SEATS) {
+//            checkDBUpdate=1;
+//            Toast.makeText(this, "Checking for updates in DB", Toast.LENGTH_SHORT).show();
+//        }
 //        TextView tv1 = (TextView) view;
 //        if ((int) view.getTag() == STATUS_PRESENT) {
 //            Toast.makeText(this, dbHandler.getNameById(view.getId()), Toast.LENGTH_SHORT).show();
@@ -671,7 +837,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     socket = new Socket(MainActivity.IP, MainActivity.PORT);
                     dos = new DataOutputStream(socket.getOutputStream());
                     String message;
-                    message = "get statuses";
+                    message = "get statuses " + (MainActivity.BEIT_KNESET_NUMBER-1);
                     String receivedMsg = "";
                     dos.writeUTF(message);
                     dos.flush();
@@ -813,6 +979,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 dbHandler.insertUserDetails(name,phoneNumber,seatId, "red");
                 setNewUsers(Integer.parseInt(seatId), name);
             } else {
+//                Log.d("Check", "insertToDBUpdated: " + splitedLine[0] + " " + splitedLine[1] + " "  + splitedLine[2]);
                 name = splitedLine[1] + " " + splitedLine[2];
                 if (name.equals("פנוי")){
 //                    setMissing(Integer.parseInt(seatId));
@@ -835,7 +1002,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             view.setTextColor(Color.GRAY);
             view.setTag(1);
         } else {
-            view.setBackgroundResource(R.drawable.ic_seats_light_red);
+            view.setBackgroundResource(R.drawable.ic_seats_light_red1);
             view.setTextColor(Color.WHITE);
             view.setTag(2);
         }
@@ -854,8 +1021,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             thisTurn = noChangeText;
         }
         Log.d("MainActivity", "setName: countX: " + countX);
-        for (int i=0;i<countX;i++) {
-            TextView view = layout.findViewById(myResources[i]);
+        TextView view = layout.findViewById(myResources[0]);
+        view.setText(BEIT_KNESET_NAME);
+        view.setGravity(Gravity.CENTER);
+        view.setTypeface(null, Typeface.BOLD);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            view.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            view.setAutoSizeTextTypeUniformWithConfiguration(8, 14, 1, TypedValue.COMPLEX_UNIT_DIP);
+        } else {
+            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 8, 14, 1, TypedValue.COMPLEX_UNIT_DIP);
+        }
+        for (int i=1;i<countX;i++) {
+            view = layout.findViewById(myResources[i]);
             view.setText(thisTurn[i]);
             view.setGravity(Gravity.CENTER);
             if (i<=2){
@@ -882,7 +1061,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(turn==2) {
                 if (toWrite2[3].equals("")) {
                     turn = 0;
-                    Log.d("BLABLA", "run: TESTING went insidde + " + turn);
                 }
             }
             if(turn==0){
@@ -899,11 +1077,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     successfulConnection = 1;
                     dos = new DataOutputStream(socket.getOutputStream());
                     String message;
-                    if (toWrite[2].equals("")) {
-                        message = "get messages new";
-                    } else {
-                        message = "get messages";
-                    }
+//                    if (toWrite[2].equals("")) {
+//                        message = "get messages new " + (MainActivity.BEIT_KNESET_NUMBER-1);
+//                    } else {
+//                        message = "get messages " + (MainActivity.BEIT_KNESET_NUMBER-1);
+//                    }
+                    message = "get messages " + (MainActivity.BEIT_KNESET_NUMBER-1);
                     String receivedMsg = "";
                     dos.writeUTF(message);
                     dos.flush();
@@ -912,6 +1091,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     is = socket.getInputStream();
                     is.read(bufferSize);
                     receivedMsg = new String(bufferSize, "UTF-8");
+                    Log.d("getMessages", "Received messages1: " + receivedMsg);
                     if (!receivedMsg.equals("000")) {
                         byte[] buffer = new byte[Integer.parseInt(receivedMsg)];
                         message = "received num";
@@ -922,7 +1102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         receivedMsg = new String(buffer, "UTF-8");
                         if (receivedMsg != null) {
                             messages = receivedMsg.split("\n");
-                            Log.d("getMessages", "Received messages: " + receivedMsg);
+                            Log.d("getMessages", "Received messages2: " + receivedMsg);
 //                            toWrite = defaultWrite;
 //                            toWrite2 = defaultWrite;
                             toWrite[3] = "";
@@ -1011,7 +1191,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 successfulConnection=1;
                 dos = new DataOutputStream(socket.getOutputStream());
                 String message;
-                message = "get updates";
+                message = "get updates " + (MainActivity.BEIT_KNESET_NUMBER-1);
                 String receivedMsg = "";
                 dos.writeUTF(message);
                 dos.flush();
@@ -1019,36 +1199,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 is = socket.getInputStream();
                 byte[] buffer, bufferLen;
                 String receivedMsgLong = "";
+                int messagelen=0;
                 while (true) {
                     bufferLen = new byte[1];
                     is.read(bufferLen);
                     receivedMsg = new String(bufferLen, "UTF-8");
                     Log.d("getUpdates", "Received 1: " + receivedMsg);
                     if (receivedMsg.equals("0")) {
-                        dos.writeUTF("recieved");
+                        dos.writeUTF("received");
                         dos.flush();
                         break;
                     }
                     bufferLen = new byte[Integer.parseInt(receivedMsg)];
-                    dos.writeUTF("recieved");
+                    dos.writeUTF("received");
                     dos.flush();
                     is.read(bufferLen);
                     receivedMsg = new String(bufferLen, "UTF-8");
-                    Log.d("getUpdates", "Received 2: " + receivedMsg);
+                    Log.d("getUpdates",  "Received 2: " + receivedMsg);
+                    messagelen = Integer.parseInt(receivedMsg)/2;
                     buffer = new byte[Integer.parseInt(receivedMsg)];
-                    dos.writeUTF("recieved");
+                    dos.writeUTF("received");
                     dos.flush();
                     is.read(buffer);
                     receivedMsg = new String(buffer, "UTF-8");
-                    receivedMsgLong += receivedMsg;
-                    Log.i("Receiving users", Integer.toString(receivedMsg.length()));
-                    dos.writeUTF("recieved");
+                    receivedMsgLong += receivedMsg.substring(0,receivedMsg.indexOf('|'));
+//                    Log.i("Receiving users", Integer.toString(receivedMsg.substring(0,receivedMsg.indexOf('|')).length()));
+//                    Log.i("Receiving users", receivedMsg.substring(0,receivedMsg.indexOf('|')));
+                    dos.writeUTF("received");
                     dos.flush();
                 }
                 if (receivedMsg != null) {
                     messages = receivedMsgLong.split("\n");
                     Log.d("getUpdates", "Received updates: " + messages.length);
-                    Log.d("getUpdates", "Received updates: " + messages[208]);
                     final Semaphore mutex = new Semaphore(0);
                     runOnUiThread(new Runnable() {
                             @Override
@@ -1195,7 +1377,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }*/
 
     class adsThread implements Runnable {
-        int[] ads = {R.drawable.ad1,R.drawable.ad2,R.drawable.ad3,R.drawable.advertise_here};
+        int[] ads = {R.drawable.candle_test1,R.drawable.candle_test2,R.drawable.candle_test3,R.drawable.candle_test4,R.drawable.candle_test5,R.drawable.candle_test6,R.drawable.advertise_here1};
         ImageView ad1 = findViewById(R.id.ad1);
         ImageView ad2 = findViewById(R.id.ad2);
         ImageView ad3 = findViewById(R.id.ad3);
@@ -1207,11 +1389,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void run() {
                         ad1.setImageResource(ads[x]);
                         ad2.setImageResource(ads[x+1]);
-                        ad3.setImageResource(ads[3]);
+                        ad3.setImageResource(ads[x+2]);
+//                        ad1.setImageResource(ads[6]);
+//                        ad2.setImageResource(ads[6]);
+//                        ad3.setImageResource(ads[6]);
                     }
                 });
-                x++;
-                if (x==2){x=0;}
+                x=x+3;
+                if (x==6){x=0;}
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
