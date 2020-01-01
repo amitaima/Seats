@@ -82,11 +82,11 @@ public class LoginFragment extends Fragment {
                     passwordAuthentication=true;
                 }
                 if (passwordAuthentication == true){
-                    loginPrefsEditor.putInt("BeitKnesetNumber", dropdown.getSelectedItemPosition()+1);
+                    loginPrefsEditor.putInt("ParkingLotNumber", dropdown.getSelectedItemPosition()+1);
                     loginPrefsEditor.putBoolean("isLoginKey",true);
                     loginPrefsEditor.apply();
                     loginPrefsEditor.commit();
-                    MainActivity.BEIT_KNESET_NUMBER=dropdown.getSelectedItemPosition()+1; // Startrs from 1
+                    MainActivity.PARKING_LOT_NUMBER=dropdown.getSelectedItemPosition()+1; // Startrs from 1
 //                    MainActivity.BEIT_KNESET_NUMBER=2;
 
                     getActivity().getFragmentManager().popBackStack();
@@ -116,7 +116,7 @@ public class LoginFragment extends Fragment {
                 }
                 DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                 String message;
-                message = "get password " + dropdown.getSelectedItemPosition(); // Startrs from 0
+                message = "1 get password " + dropdown.getSelectedItemPosition(); // Startrs from 0
                 String receivedMsg = "";
                 dos.writeUTF(message);
                 dos.flush();

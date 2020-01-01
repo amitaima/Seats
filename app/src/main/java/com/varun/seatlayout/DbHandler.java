@@ -17,8 +17,6 @@ public class DbHandler extends SQLiteOpenHelper {
     private static final String TABLE_Users = "userdetails";
     private static final String KEY_ID = "id";
     private static final String KEY_NAME = "name";
-    private static final String KEY_PN = "phoneNumber";
-    private static final String KEY_SID = "seatId";
     private static final String KEY_STATUS = "status";
     public DbHandler(Context context){
         super(context,DB_NAME, null, DB_VERSION);
@@ -28,8 +26,6 @@ public class DbHandler extends SQLiteOpenHelper {
         String CREATE_TABLE = "CREATE TABLE " + TABLE_Users + "("
                 + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + KEY_NAME + " TEXT,"
-                + KEY_PN + " TEXT,"
-                + KEY_SID + " TEXT,"
                 + KEY_STATUS + " TEXT"+ ")";
         db.execSQL(CREATE_TABLE);
     }
@@ -44,30 +40,27 @@ public class DbHandler extends SQLiteOpenHelper {
     // **** CRUD (Create, Read, Update, Delete) Operations ***** //
 
     // Adding new User Details
-    void insertUserDetails(String name, String phoneNumber, String seatId, String status){
+    void insertUserDetails(String name, String status){
         //Get the Data Repository in write mode
         SQLiteDatabase db = this.getWritableDatabase();
         //Create a new map of values, where column names are the keys
         ContentValues cValues = new ContentValues();
         cValues.put(KEY_NAME, name);
-        cValues.put(KEY_PN, phoneNumber);
-        cValues.put(KEY_SID, seatId);
         cValues.put(KEY_STATUS, status);
         // Insert the new row, returning the primary key value of the new row
         long newRowId = db.insert(TABLE_Users,null, cValues);
         db.close();
     }
+
     // Get User Details
     public ArrayList<HashMap<String, String>> GetUsers(){
         SQLiteDatabase db = this.getWritableDatabase();
         ArrayList<HashMap<String, String>> userList = new ArrayList<>();
-        String query = "SELECT name, phoneNumber, seatId, status FROM "+ TABLE_Users;
+        String query = "SELECT name, status FROM "+ TABLE_Users;
         Cursor cursor = db.rawQuery(query,null);
         while (cursor.moveToNext()){
             HashMap<String,String> user = new HashMap<>();
             user.put("name",cursor.getString(cursor.getColumnIndex(KEY_NAME)));
-            user.put("phoneNumber",cursor.getString(cursor.getColumnIndex(KEY_PN)));
-            user.put("seatId",cursor.getString(cursor.getColumnIndex(KEY_SID)));
             user.put("status",cursor.getString(cursor.getColumnIndex(KEY_STATUS)));
             userList.add(user);
         }
@@ -78,7 +71,7 @@ public class DbHandler extends SQLiteOpenHelper {
     public String getData()
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        String[] columns = {KEY_ID,KEY_NAME,KEY_PN,KEY_SID};
+        String[] columns = {KEY_ID,KEY_NAME};
         Cursor cursor =db.query(TABLE_Users,columns,null,null,null,null,null);
 //        Cursor cursor = db.rawQuery("SELECT * FROM " + myDbHelper.TABLE_NAME + "", null);
         StringBuffer buffer= new StringBuffer();
@@ -86,71 +79,67 @@ public class DbHandler extends SQLiteOpenHelper {
         {
             int cid =cursor.getInt(cursor.getColumnIndex(KEY_ID));
             String name =cursor.getString(cursor.getColumnIndex(KEY_NAME));
-            String phoneNumber =cursor.getString(cursor.getColumnIndex(KEY_PN));
-            String seatId =cursor.getString(cursor.getColumnIndex(KEY_SID));
 //            String status =cursor.getString(cursor.getColumnIndex(KEY_STATUS));
-            buffer.append(cid+ "   " + name + "   " + phoneNumber +"    " + seatId +"\n");
+            buffer.append(cid+ "   " + name +"\n");
         }
         cursor.close();
         return buffer.toString();
     }
 
-    public String getPhoneNumbers()
-    {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String[] columns = {KEY_PN};
-        Cursor cursor =db.query(TABLE_Users,columns,null,null,null,null,null);
-        StringBuffer buffer= new StringBuffer();
-        while (cursor.moveToNext())
-        {
-            String phoneNumber =cursor.getString(cursor.getColumnIndex(KEY_PN));
-            buffer.append(phoneNumber+"\n");
-        }
-        cursor.close();
-        return buffer.toString();
-    }
+//    public String searchByPN(String phoneNumber)
+//    {
+//        SQLiteDatabase db = this.getWritableDatabase();
+////        String[] whereArgs ={phoneNumber};
+////        int count =db.delete(TABLE_Users ,KEY_NAME+" = ?",whereArgs);
+////        Cursor TuplePointer = db.rawQuery("select * from " + TABLE_Users + " where "+KEY_NAME+" = ?", whereArgs );
+//        String query = "SELECT name, seatId, status FROM "+ TABLE_Users + " WHERE phoneNumber = '" + phoneNumber + "'";
+//        Cursor cursor = db.rawQuery(query,null);
+////        cursor.moveToFirst();
+//        StringBuffer buffer= new StringBuffer();
+//        while (cursor.moveToNext())
+//        {
+//            String name1 =cursor.getString(cursor.getColumnIndex(KEY_NAME));
+//            String status =cursor.getString(cursor.getColumnIndex(KEY_STATUS));
+//            buffer.append(name1 +"  " + status+ "\n");
+//        }
+//        cursor.close();
+//        return buffer.toString();
+//    }
 
-    public String searchByPN(String phoneNumber)
+    public String idFromName(String name)
     {
         SQLiteDatabase db = this.getWritableDatabase();
-//        String[] whereArgs ={phoneNumber};
-//        int count =db.delete(TABLE_Users ,KEY_NAME+" = ?",whereArgs);
-//        Cursor TuplePointer = db.rawQuery("select * from " + TABLE_Users + " where "+KEY_NAME+" = ?", whereArgs );
-        String query = "SELECT name, phoneNumber, seatId, status FROM "+ TABLE_Users + " WHERE phoneNumber = '" + phoneNumber + "'";
-        Cursor cursor = db.rawQuery(query,null);
-//        cursor.moveToFirst();
-        StringBuffer buffer= new StringBuffer();
-        while (cursor.moveToNext())
-        {
-            String name1 =cursor.getString(cursor.getColumnIndex(KEY_NAME));
-            String phoneNumber1 =cursor.getString(cursor.getColumnIndex(KEY_PN));
-            String seatId1 =cursor.getString(cursor.getColumnIndex(KEY_SID));
-            String status =cursor.getString(cursor.getColumnIndex(KEY_STATUS));
-            buffer.append(name1 + "   " + phoneNumber1 +"   " + seatId1 +"  " + status+ "\n");
-        }
-        cursor.close();
-        return buffer.toString();
-    }
-
-    public String seatIdFromPN(String phoneNumber)
-    {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT seatId FROM "+ TABLE_Users + " WHERE phoneNumber = '" + phoneNumber + "'";
+        String query = "SELECT id FROM "+ TABLE_Users + " WHERE name = '" + name + "'";
         Cursor cursor = db.rawQuery(query,null);
         StringBuffer buffer= new StringBuffer();
         while (cursor.moveToNext())
         {
-            String seatId1 =cursor.getString(cursor.getColumnIndex(KEY_SID));
-            buffer.append(seatId1 +"\n");
+            String id1 =cursor.getString(cursor.getColumnIndex(KEY_ID));
+            buffer.append(id1 +"\n");
         }
         cursor.close();
         return buffer.toString();
     }
 
-    public String statusFromSeatId(String seatId)
+    public String nameFromId(int id)
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT status FROM "+ TABLE_Users + " WHERE seatId = '" + seatId + "'";
+        String query = "SELECT name FROM "+ TABLE_Users + " WHERE id = '" + Integer.toString(id) + "'";
+        Cursor cursor = db.rawQuery(query,null);
+        StringBuffer buffer= new StringBuffer();
+        while (cursor.moveToNext())
+        {
+            String name =cursor.getString(cursor.getColumnIndex(KEY_NAME));
+            buffer.append(name +"\n");
+        }
+        cursor.close();
+        return buffer.toString();
+    }
+
+    public String statusFromName(String name)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "SELECT status FROM "+ TABLE_Users + " WHERE name = '" + name + "'";
         Cursor cursor = db.rawQuery(query,null);
         StringBuffer buffer= new StringBuffer();
         while (cursor.moveToNext())
@@ -162,37 +151,36 @@ public class DbHandler extends SQLiteOpenHelper {
         return buffer.toString();
     }
 
-    public String getGreenSeatId()
+    public String getGreenId()
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT seatId FROM "+ TABLE_Users + " WHERE status = 'green'";
+        String query = "SELECT id FROM "+ TABLE_Users + " WHERE status = 'green'";
         Cursor cursor = db.rawQuery(query,null);
         StringBuffer buffer= new StringBuffer();
         while (cursor.moveToNext())
         {
-            String seatId =cursor.getString(cursor.getColumnIndex(KEY_SID));
-            buffer.append(seatId +" ");
+            String id =cursor.getString(cursor.getColumnIndex(KEY_ID));
+            buffer.append(id +"\n");
         }
         cursor.close();
         return buffer.toString();
     }
 
-    // Get User Details based on userid
-    public ArrayList<HashMap<String, String>> GetUserByUserId(int userid){
+    public String getGreenName()
+    {
         SQLiteDatabase db = this.getWritableDatabase();
-        ArrayList<HashMap<String, String>> userList = new ArrayList<>();
-        String query = "SELECT name, location, designation FROM "+ TABLE_Users;
-        Cursor cursor = db.query(TABLE_Users, new String[]{KEY_NAME, KEY_PN, KEY_SID}, KEY_ID+ "=?",new String[]{String.valueOf(userid)},null, null, null, null);
-        if (cursor.moveToNext()){
-            HashMap<String,String> user = new HashMap<>();
-            user.put("name",cursor.getString(cursor.getColumnIndex(KEY_NAME)));
-            user.put("phoneNumber",cursor.getString(cursor.getColumnIndex(KEY_PN)));
-            user.put("seatId",cursor.getString(cursor.getColumnIndex(KEY_SID)));
-            userList.add(user);
+        String query = "SELECT name FROM "+ TABLE_Users + " WHERE status = 'green'";
+        Cursor cursor = db.rawQuery(query,null);
+        StringBuffer buffer= new StringBuffer();
+        while (cursor.moveToNext())
+        {
+            String name =cursor.getString(cursor.getColumnIndex(KEY_NAME));
+            buffer.append(name +"\n");
         }
         cursor.close();
-        return  userList;
+        return buffer.toString();
     }
+
     // Delete User Details
     public void DeleteUser(int userid){
         SQLiteDatabase db = this.getWritableDatabase();
@@ -204,11 +192,6 @@ public class DbHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "SELECT name FROM "+ TABLE_Users + " WHERE seatId = '" + userId + "'";
         Cursor cursor = db.rawQuery(query,null);
-//        while (cursor.moveToNext())
-//        {
-//            String name1 =cursor.getString(cursor.getColumnIndex(KEY_NAME));
-//            buffer.append(name1 +"\n");
-//        }
         cursor.moveToFirst();
         String name1 =cursor.getString(cursor.getColumnIndex(KEY_NAME));
         cursor.close();
@@ -220,12 +203,12 @@ public class DbHandler extends SQLiteOpenHelper {
         db.execSQL("delete from "+ TABLE_Users);
         db.close();
     }
+
     // Update User Details
-    public int UpdateUserDetails(String phoneNumber, String seatId, int id){
+    public int UpdateUserDetails(String name, int id){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cVals = new ContentValues();
-        cVals.put(KEY_PN, phoneNumber);
-        cVals.put(KEY_SID, seatId);
+        cVals.put(KEY_NAME, name);
         int count = db.update(TABLE_Users, cVals, KEY_ID+" = ?",new String[]{String.valueOf(id)});
         return  count;
     }
@@ -235,7 +218,7 @@ public class DbHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cVals = new ContentValues();
         cVals.put(KEY_STATUS, status);
-        int count = db.update(TABLE_Users, cVals, KEY_SID+" = ?",new String[]{String.valueOf(id)});
+        int count = db.update(TABLE_Users, cVals, KEY_ID+" = ?",new String[]{String.valueOf(id)});
         return  count;
     }
 }

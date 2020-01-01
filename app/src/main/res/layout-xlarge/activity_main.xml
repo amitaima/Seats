@@ -20,39 +20,12 @@
             android:scrollbars="vertical">
 
             <HorizontalScrollView
-                android:id="@+id/layoutSeat"
+                android:id="@+id/layoutSpot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center" />
 
         </ScrollView>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight=".9"
-            android:gravity="center">
-
-            <ImageView
-                android:id="@+id/ad1"
-                android:adjustViewBounds="true"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-            <ImageView
-                android:id="@+id/ad2"
-                android:adjustViewBounds="true"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-            <ImageView
-                android:id="@+id/ad3"
-                android:adjustViewBounds="true"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-        </LinearLayout>
     </LinearLayout>
 
     <FrameLayout
