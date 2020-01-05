@@ -74,6 +74,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import pl.droidsonroids.gif.GifImageView;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     static ViewGroup layout;
 
@@ -1326,12 +1328,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void setAds(){
         int[] ads = {R.drawable.ad1,R.drawable.ad2,R.drawable.ad3,R.drawable.advertise_here};
-        ImageView ad1 = findViewById(R.id.ad1);
-        ImageView ad2 = findViewById(R.id.ad2);
-        ImageView ad3 = findViewById(R.id.ad3);
-        ad1.setImageResource(ads[0]);
-        ad2.setImageResource(ads[1]);
-        ad3.setImageResource(ads[2]);
+//        ImageView ad1 = findViewById(R.id.ad1);
+//        ImageView ad2 = findViewById(R.id.ad2);
+//        ImageView ad3 = findViewById(R.id.ad3);
+//        ad1.setImageResource(ads[0]);
+//        ad2.setImageResource(ads[1]);
+//        ad3.setImageResource(ads[2]);
 //        ad1.setBackground(ContextCompat.getDrawable(this, R.drawable.ad1));
 //        ad2.setBackground(ContextCompat.getDrawable(this, R.drawable.ad2));
 //        ad3.setBackground(ContextCompat.getDrawable(this, R.drawable.advertise_here));
@@ -1377,28 +1379,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }*/
 
     class adsThread implements Runnable {
-        int[] ads = {R.drawable.candle_test1,R.drawable.candle_test2,R.drawable.candle_test3,R.drawable.candle_test4,R.drawable.candle_test5,R.drawable.candle_test6,R.drawable.advertise_here1};
-        ImageView ad1 = findViewById(R.id.ad1);
-        ImageView ad2 = findViewById(R.id.ad2);
-        ImageView ad3 = findViewById(R.id.ad3);
+//        int[] ads = {R.drawable.candle_test1,R.drawable.candle_test2,R.drawable.candle_test3,R.drawable.candle_test4,R.drawable.candle_test5,R.drawable.candle_test6,R.drawable.advertise_here1};
+//        ImageView ad1 = findViewById(R.id.ad1);
+//        ImageView ad2 = findViewById(R.id.ad2);
+//        ImageView ad3 = findViewById(R.id.ad3);
+//        @Override
+//        public void run() {
+//            while (true){
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        ad1.setImageResource(ads[x]);
+//                        ad2.setImageResource(ads[x+1]);
+//                        ad3.setImageResource(ads[x+2]);
+////                        ad1.setImageResource(ads[6]);
+////                        ad2.setImageResource(ads[6]);
+////                        ad3.setImageResource(ads[6]);
+//                    }
+//                });
+//                x=x+3;
+//                if (x==6){x=0;}
+//                try {
+//                    Thread.sleep(5000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+        String[] names = {"שרה בת רחל","שמשמון בן יובב הכהן", "שמחה בת ששון", "בני בן ביבי", "נתן בן שמעון", "יוסי בן מנש"};
+        TextView candle1 = findViewById(R.id.candleName1);
+        TextView candle2 = findViewById(R.id.candleName2);
+        TextView candle3 = findViewById(R.id.candleName3);
+        GifImageView gif1 = findViewById(R.id.ad1);
+        GifImageView gif2 = findViewById(R.id.ad2);
+        GifImageView gif3 = findViewById(R.id.ad3);
         @Override
         public void run() {
             while (true){
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ad1.setImageResource(ads[x]);
-                        ad2.setImageResource(ads[x+1]);
-                        ad3.setImageResource(ads[x+2]);
-//                        ad1.setImageResource(ads[6]);
-//                        ad2.setImageResource(ads[6]);
-//                        ad3.setImageResource(ads[6]);
+                        candle1.setText(names[x]);
+                        candle2.setText(names[x+1]);
+                        candle3.setText(names[x+2]);
                     }
                 });
                 x=x+3;
                 if (x==6){x=0;}
                 try {
-                    Thread.sleep(5000);
+                    gif2.setImageResource(R.drawable.candle);
+                    Thread.sleep(325);
+                    gif1.setImageResource(R.drawable.candle);
+                    Thread.sleep(275);
+                    gif3.setImageResource(R.drawable.candle);
+                    Thread.sleep(4400);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
