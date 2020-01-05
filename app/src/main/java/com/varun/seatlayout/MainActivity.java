@@ -837,12 +837,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     socket = new Socket(MainActivity.IP, MainActivity.PORT);
                     dos = new DataOutputStream(socket.getOutputStream());
                     String message;
-                    message = "get statuses " + (MainActivity.BEIT_KNESET_NUMBER-1);
+                    message = "0 get statuses " + (MainActivity.BEIT_KNESET_NUMBER-1);
                     String receivedMsg = "";
                     dos.writeUTF(message);
                     dos.flush();
                     dos = new DataOutputStream(socket.getOutputStream());
-                    byte[] bufferSize = new byte[2];
+                    byte[] bufferSize = new byte[3];
                     is = socket.getInputStream();
                     is.read(bufferSize);
                     receivedMsg = new String(bufferSize, "UTF-8");
@@ -1082,7 +1082,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                    } else {
 //                        message = "get messages " + (MainActivity.BEIT_KNESET_NUMBER-1);
 //                    }
-                    message = "get messages " + (MainActivity.BEIT_KNESET_NUMBER-1);
+                    message = "0 get messages " + (MainActivity.BEIT_KNESET_NUMBER-1);
                     String receivedMsg = "";
                     dos.writeUTF(message);
                     dos.flush();
@@ -1191,7 +1191,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 successfulConnection=1;
                 dos = new DataOutputStream(socket.getOutputStream());
                 String message;
-                message = "get updates " + (MainActivity.BEIT_KNESET_NUMBER-1);
+                message = "0 get updates " + (MainActivity.BEIT_KNESET_NUMBER-1);
                 String receivedMsg = "";
                 dos.writeUTF(message);
                 dos.flush();

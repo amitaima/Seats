@@ -116,7 +116,7 @@ public class LoginFragment extends Fragment {
                 }
                 DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                 String message;
-                message = "get password " + dropdown.getSelectedItemPosition(); // Startrs from 0
+                message = "0 get password " + dropdown.getSelectedItemPosition(); // Startrs from 0
                 String receivedMsg = "";
                 dos.writeUTF(message);
                 dos.flush();
