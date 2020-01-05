@@ -47,7 +47,7 @@ public class LoginFragment extends Fragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             dropdown.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         }
-        String[] items = new String[]{"נחלת שי", "היכל שלמה", "המלך דוד"};
+        String[] items = MainActivity.parkingLots;
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(myView.getContext(), android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
 

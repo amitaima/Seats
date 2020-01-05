@@ -124,7 +124,7 @@ public class DbHandler extends SQLiteOpenHelper {
     public String nameFromId(int id)
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT name FROM "+ TABLE_Users + " WHERE id = '" + Integer.toString(id) + "'";
+        String query = "SELECT name FROM "+ TABLE_Users + " WHERE id = '" + id + "'";
         Cursor cursor = db.rawQuery(query,null);
         StringBuffer buffer= new StringBuffer();
         while (cursor.moveToNext())
@@ -133,7 +133,7 @@ public class DbHandler extends SQLiteOpenHelper {
             buffer.append(name +"\n");
         }
         cursor.close();
-        return buffer.toString();
+        return buffer.toString().split("\n")[0];
     }
 
     public String statusFromName(String name)
@@ -190,12 +190,12 @@ public class DbHandler extends SQLiteOpenHelper {
 
     public String getNameById(int userId){
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT name FROM "+ TABLE_Users + " WHERE seatId = '" + userId + "'";
+        String query = "SELECT name FROM "+ TABLE_Users + " WHERE id = '" + userId + "'";
         Cursor cursor = db.rawQuery(query,null);
         cursor.moveToFirst();
-        String name1 =cursor.getString(cursor.getColumnIndex(KEY_NAME));
+        String name =cursor.getString(cursor.getColumnIndex(KEY_NAME));
         cursor.close();
-        return name1;
+        return name;
     }
 
     public void DeleteAll(){

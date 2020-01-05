@@ -85,42 +85,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     + "AAAAAAAAAAAAAA/";
 
     public String spots1 =
-                    "______________/"
-                    + "___X____/"
-                    + "AAAAAAAAAAAAAA/"
-                    + "AAAAAAAAAAAAAA/"
-                    + "AAAAAAAAAAAAAA/";
+            "_/"
+                    + "X/"
+                    + "A/"
+                    + "A/"
+                    + "A/";
 
 
     public String spots2 =
-            "______________/"
-                    + "___X____/"
-                    + "AAAAAAAAAAAAAA/"
-                    + "AAAAAAAAAAAAAA/"
-                    + "AAAAAAAAAAAAAA/";
+            "_/"
+                    + "X/"
+                    + "AAAAAAAAA/";
 
     public String spots3 =
-            "____________B___U___/"
-                    + "_______U____X__UUU__/"
-                    + "_______UU___X__UUU__/"
-                    + "______UUUA___________AUUU_/"
-                    + "______UUUU__AAAAAAA__AUUU_/"
-                    + "____________UUUUUUU_______/"
-                    + "AA___UUUUU__UUUUUUU__AUUUU/"
-                    + "AAU__UUUUA__UUUUUUU__AUUUU/"
-                    + "AAUU_UUUUU___________AUUUU/"
-                    + "AAUU_UUUUA__X__AUUUU/"
-                    + "____________X______A/"
-                    + "UUUU_UUUUU__X__AUUUU/"
-                    + "UUUU_UUUUA__X__AUUUU/"
-                    + "A_UU_UUUUA__X__AUUUU/"
-                    + "AA___UUUUA__X__AUUUU/"
-                    + "AA________________________/"
-//            + "__________________________/"
-                    + "_________AAAAAA_AAAAAAA__U/"
-                    + "_________UUUUUU_UUUUUUU_U_/"
-                    + "__________UUUUU_UUUUUU____/"
-                    + "___________UUUUUUUUU______/";
+                    "______________/"
+                    + "___X____/"
+                    + "______A_______/"
+                    + "______A_______/"
+                    + "______A_______/";
 
     List<TextView> spotViewList = new ArrayList<>();
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 1;
@@ -130,11 +112,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int spotGapingV = 0;
     static int PARKING_LOT_NUMBER = 0;
     String PARKING_LOT_NAME = "";
-    String[] parkingLots = {"חניון נייק", "חניון גוונים", "חניון גוגל"};
+    static String[] parkingLots = {"חניון נייק", "חניון גוונים", "חניון גוגל"};
     DbHandler dbHandler;
     //    static public final String IP = "192.168.43.43"; // Phone Router
-//    static public final String IP = "89.139.205.95"; // Home Router
-    static public final String IP = "myseatingapp.ddns.net"; // Home Router
+    static public final String IP = "10.100.102.212"; // Home Router
+//    static public final String IP = "myseatingapp.ddns.net"; // Home Router
     static public final int PORT = 443;
     public Socket socket;
     public DataOutputStream dos;
@@ -188,9 +170,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         layout = findViewById(R.id.layoutSpot);
         SharedPreferences prefs = getSharedPreferences("loginPrefs", MODE_PRIVATE);
-        Toast.makeText(this, "saved: " + prefs.getInt("BeitKnesetNumber", 0), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "saved: " + prefs.getInt("ParkingLotNumber", 0), Toast.LENGTH_LONG).show();
         if (prefs.getBoolean("isLoginKey", false)) {
-            PARKING_LOT_NUMBER = prefs.getInt("BeitKnesetNumber", 0);
+            PARKING_LOT_NUMBER = prefs.getInt("ParkingLotNumber", 0);
         } else {
             replaceFragment();
         }
@@ -249,9 +231,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            spots = spots3;
 //        }
         PARKING_LOT_NAME = parkingLots[PARKING_LOT_NUMBER - 1];
+        spots = spots2; // Do like the parking_lot_name...
 
-        int spotHeight = (Resources.getSystem().getDisplayMetrics().heightPixels) / 22;
-        int spotWidth = (Resources.getSystem().getDisplayMetrics().widthPixels) / 30;
+        int spotHeight = (Resources.getSystem().getDisplayMetrics().heightPixels) / 15;
+        int spotWidth = (Resources.getSystem().getDisplayMetrics().widthPixels) / 23+5;
         Log.e("Screen size", String.valueOf(Resources.getSystem().getDisplayMetrics().heightPixels));
         Log.e("Screen size", String.valueOf(Resources.getSystem().getDisplayMetrics().heightPixels / 24));
 
@@ -261,12 +244,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         float additionByScreen = getResources().getDimension(R.dimen.text_size);
 
         LinearLayout layoutspot = new LinearLayout(this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutspot.setOrientation(LinearLayout.VERTICAL);
         layoutspot.setLayoutParams(params);
-        layoutspot.setPadding(6 * spotGapingH, 8 * spotGapingV, 6 * spotGapingH, 8 * spotGapingV);
+//        layoutspot.setPadding(6 * spotGapingH, 8 * spotGapingV, 6 * spotGapingH, 8 * spotGapingV);
         layout.addView(layoutspot);
-        layout.setBackgroundResource(R.drawable.b7);
+//        layout.setBackgroundResource(R.drawable.b7);
 
         LinearLayout layout = null;
         count = 0;
@@ -294,14 +277,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                view.setPadding(0, 0, 0, 2 * spotGapingV);
                 view.setPadding(0, 0, 0, 0);
                 view.setId(count);
-                view.setGravity(Gravity.CENTER);
-                view.setBackgroundResource(R.drawable.ic_seats_light_red1);
+                view.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+                view.setBackgroundResource(R.drawable.ic_car_red);
 //                view.setBackgroundColor(Color.RED);
                 view.setTextColor(Color.WHITE);
                 view.setTag(STATUS_PRESENT);
 //                view.setText(count + "");
 //                view.setText("מלכה");
-                view.setText(dbHandler.getNameById(count));
+                view.setText(dbHandler.nameFromId(count));
                 view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, spotWidth / 13 + additionByScreen); //spotWidth/13+4
                 layout.addView(view);
                 spotViewList.add(view);
@@ -315,18 +298,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                layoutParams.weight = 1;
                 layoutParams.setMargins(spotGapingH, spotGapingV, spotGapingH, spotGapingV);
                 view.setLayoutParams(layoutParams);
-                view.setPadding(0, 0, 0, 2 * spotGapingV);
+                view.setPadding(0, 12, 0, 2 * spotGapingV);
                 view.setId(count);
-                view.setGravity(Gravity.CENTER);
-                view.setBackgroundResource(R.drawable.ic_seats_light_green);
+                view.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+                view.setBackgroundResource(R.drawable.ic_car_green);
 //                view.setBackgroundColor(Color.GREEN);
 //                view.setText(count + "");
 //                view.setText(dbHandler.getNameById(count));
-                view.setText(dbHandler.getNameById(count));
+//                view.setText(dbHandler.nameFromId(count));
+                view.setText("13A");
 //                view.setAutoSizeTextTypeUniformWithConfiguration(3,10,1,TypedValue.COMPLEX_UNIT_DIP);
 //                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 3, 5, 1, TypedValue.COMPLEX_UNIT_DIP);
                 view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, spotWidth / 13 + additionByScreen); //spotWidth/13+4
-                view.setTextColor(Color.GRAY);
+                view.setTextColor(Color.BLACK);
                 view.setTag(STATUS_MISSING);
                 layout.addView(view);
                 spotViewList.add(view);
@@ -341,7 +325,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                view.setBackgroundColor(getResources().getColor(R.color.veryLiightGray));
                 view.setId(R.id.NameText);
                 view.setText(PARKING_LOT_NAME);
-                view.setTextColor(Color.GRAY);
+                view.setTextColor(Color.BLACK);
+                view.setGravity(Gravity.CENTER);
                 view.setOnClickListener(this);
                 layout.addView(view);
                 countX++;
@@ -376,15 +361,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static void setMissing(int id) {
         TextView view = layout.findViewById(id);
-        view.setBackgroundResource(R.drawable.ic_seats_light_green);
-        view.setTextColor(Color.GRAY);
+        view.setBackgroundResource(R.drawable.ic_car_green);
+        view.setTextColor(Color.BLACK);
         view.setTag(1);
     }
 
     public static void setPresent(int id) {
         TextView view = layout.findViewById(id);
-        view.setBackgroundResource(R.drawable.ic_seats_light_red1);
-        view.setTextColor(Color.WHITE);
+        view.setBackgroundResource(R.drawable.ic_car_red);
+        view.setTextColor(Color.BLACK);
         view.setTag(2);
     }
 
@@ -478,6 +463,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         c.start();
                         c.join();
                     }
+                    checkDBUpdate++;
                     Thread.sleep(1000);
                     socket = new Socket(MainActivity.IP, MainActivity.PORT);
                     dos = new DataOutputStream(socket.getOutputStream());
@@ -547,7 +533,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d("getStatuses", "Error Receiving statuses");
                     }
                     socket.close();
-                    if (checkDBUpdate == 1) {
+                    if (checkDBUpdate == 3) {
                         checkDBUpdate = 0;
                         Thread c = new Thread(new updateDbThread());
                         c.start();
@@ -577,7 +563,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             reader = new BufferedReader(new InputStreamReader(file));
             String line = reader.readLine();
             while (line != null) {
-                splitedLine = line.split("\t"); // 1    12A
+                splitedLine = line.split("\\t"); // 1    12A
                 name = splitedLine[1];
                 dbHandler.insertUserDetails(name, "green");
                 line = reader.readLine();
@@ -617,7 +603,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            view.setTextColor(Color.GRAY);
 //            view.setTag(1);
 //        }
-        view.setBackgroundResource(R.drawable.ic_seats_light_green);
+        view.setBackgroundResource(R.drawable.ic_car_green);
         view.setTextColor(Color.GRAY);
         view.setTag(1);
     }
