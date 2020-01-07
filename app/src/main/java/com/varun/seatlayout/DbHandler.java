@@ -16,6 +16,7 @@ public class DbHandler extends SQLiteOpenHelper {
     private static final String DB_NAME = "usersdb";
     private static final String TABLE_Users = "userdetails";
     private static final String KEY_ID = "id";
+    private static final String KEY_SPOT_ID = "spotId";
     private static final String KEY_NAME = "name";
     private static final String KEY_STATUS = "status";
     public DbHandler(Context context){
@@ -25,6 +26,7 @@ public class DbHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db){
         String CREATE_TABLE = "CREATE TABLE " + TABLE_Users + "("
                 + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_SPOT_ID + " INTEGER,"
                 + KEY_NAME + " TEXT,"
                 + KEY_STATUS + " TEXT"+ ")";
         db.execSQL(CREATE_TABLE);
@@ -40,11 +42,12 @@ public class DbHandler extends SQLiteOpenHelper {
     // **** CRUD (Create, Read, Update, Delete) Operations ***** //
 
     // Adding new User Details
-    void insertUserDetails(String name, String status){
+    void insertUserDetails(int spotId,String name, String status){
         //Get the Data Repository in write mode
         SQLiteDatabase db = this.getWritableDatabase();
         //Create a new map of values, where column names are the keys
         ContentValues cValues = new ContentValues();
+        cValues.put(KEY_SPOT_ID,spotId);
         cValues.put(KEY_NAME, name);
         cValues.put(KEY_STATUS, status);
         // Insert the new row, returning the primary key value of the new row
@@ -71,13 +74,13 @@ public class DbHandler extends SQLiteOpenHelper {
     public String getData()
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        String[] columns = {KEY_ID,KEY_NAME};
+        String[] columns = {KEY_SPOT_ID,KEY_NAME,KEY_STATUS};
         Cursor cursor =db.query(TABLE_Users,columns,null,null,null,null,null);
 //        Cursor cursor = db.rawQuery("SELECT * FROM " + myDbHelper.TABLE_NAME + "", null);
         StringBuffer buffer= new StringBuffer();
         while (cursor.moveToNext())
         {
-            int cid =cursor.getInt(cursor.getColumnIndex(KEY_ID));
+            int cid =cursor.getInt(cursor.getColumnIndex(KEY_SPOT_ID));
             String name =cursor.getString(cursor.getColumnIndex(KEY_NAME));
 //            String status =cursor.getString(cursor.getColumnIndex(KEY_STATUS));
             buffer.append(cid+ "   " + name +"\n");
@@ -109,12 +112,12 @@ public class DbHandler extends SQLiteOpenHelper {
     public String idFromName(String name)
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT id FROM "+ TABLE_Users + " WHERE name = '" + name + "'";
+        String query = "SELECT spotId FROM "+ TABLE_Users + " WHERE name = '" + name + "'";
         Cursor cursor = db.rawQuery(query,null);
         StringBuffer buffer= new StringBuffer();
         while (cursor.moveToNext())
         {
-            String id1 =cursor.getString(cursor.getColumnIndex(KEY_ID));
+            String id1 =cursor.getString(cursor.getColumnIndex(KEY_SPOT_ID));
             buffer.append(id1 +"\n");
         }
         cursor.close();
@@ -124,7 +127,7 @@ public class DbHandler extends SQLiteOpenHelper {
     public String nameFromId(int id)
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT name FROM "+ TABLE_Users + " WHERE id = '" + id + "'";
+        String query = "SELECT name FROM "+ TABLE_Users + " WHERE spotId = '" + id + "'";
         Cursor cursor = db.rawQuery(query,null);
         StringBuffer buffer= new StringBuffer();
         while (cursor.moveToNext())
@@ -154,12 +157,12 @@ public class DbHandler extends SQLiteOpenHelper {
     public String getGreenId()
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT id FROM "+ TABLE_Users + " WHERE status = 'green'";
+        String query = "SELECT spotId FROM "+ TABLE_Users + " WHERE status = 'green'";
         Cursor cursor = db.rawQuery(query,null);
         StringBuffer buffer= new StringBuffer();
         while (cursor.moveToNext())
         {
-            String id =cursor.getString(cursor.getColumnIndex(KEY_ID));
+            String id =cursor.getString(cursor.getColumnIndex(KEY_SPOT_ID));
             buffer.append(id +"\n");
         }
         cursor.close();
@@ -184,13 +187,13 @@ public class DbHandler extends SQLiteOpenHelper {
     // Delete User Details
     public void DeleteUser(int userid){
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_Users, KEY_ID+" = ?",new String[]{String.valueOf(userid)});
+        db.delete(TABLE_Users, KEY_SPOT_ID+" = ?",new String[]{String.valueOf(userid)});
         db.close();
     }
 
     public String getNameById(int userId){
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT name FROM "+ TABLE_Users + " WHERE id = '" + userId + "'";
+        String query = "SELECT name FROM "+ TABLE_Users + " WHERE spotId = '" + userId + "'";
         Cursor cursor = db.rawQuery(query,null);
         cursor.moveToFirst();
         String name =cursor.getString(cursor.getColumnIndex(KEY_NAME));
@@ -209,7 +212,7 @@ public class DbHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cVals = new ContentValues();
         cVals.put(KEY_NAME, name);
-        int count = db.update(TABLE_Users, cVals, KEY_ID+" = ?",new String[]{String.valueOf(id)});
+        int count = db.update(TABLE_Users, cVals, KEY_SPOT_ID+" = ?",new String[]{String.valueOf(id)});
         return  count;
     }
 
@@ -218,7 +221,7 @@ public class DbHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cVals = new ContentValues();
         cVals.put(KEY_STATUS, status);
-        int count = db.update(TABLE_Users, cVals, KEY_ID+" = ?",new String[]{String.valueOf(id)});
+        int count = db.update(TABLE_Users, cVals, KEY_SPOT_ID+" = ?",new String[]{String.valueOf(id)});
         return  count;
     }
 }

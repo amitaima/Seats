@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -93,9 +94,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     public String spots2 =
-            "_/"
-                    + "X/"
-                    + "AAAAAAAAA/";
+            "X/"
+                    + "AAAAAAAAAA/"
+                    + "AAAAAAAAAA/"
+                    + "AAAAAAAAAA/"
+                    + "AAAAAAAAAA/"
+                    + "AAAAAAAAAA/"
+                    + "AAAAAAAAAA/"
+                    + "AAAAAAAAAA/"
+                    + "AAAAAAAAAA/"
+                    + "AAAAAAAAAA/"
+                    + "AAAAAAAAAA/";
 
     public String spots3 =
                     "______________/"
@@ -114,8 +123,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String PARKING_LOT_NAME = "";
     static String[] parkingLots = {"חניון נייק", "חניון גוונים", "חניון גוגל"};
     DbHandler dbHandler;
-    //    static public final String IP = "192.168.43.43"; // Phone Router
-    static public final String IP = "10.100.102.212"; // Home Router
+        static public final String IP = "192.168.43.43"; // Phone Router
+//    static public final String IP = "10.100.102.212"; // Home Router
 //    static public final String IP = "myseatingapp.ddns.net"; // Home Router
     static public final int PORT = 443;
     public Socket socket;
@@ -144,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        Toast.makeText(this, data, Toast.LENGTH_LONG).show();
         dbHandler = new DbHandler(this);
 //        SQLiteDatabase db = dbHandler.getReadableDatabase();
-//        dbHandler.onUpgrade(db,1,2);
+//        dbHandler.onUpgrade(db,2,3);
 //        dbHandler.insertUserDetails("י.בוחניק", "+972544991913", "1", "red");
 //        dbHandler.insertUserDetails("לוי", "+972549766158", "204");
 //        dbHandler.insertUserDetails("לוי", "+972549766158", "205");
@@ -233,8 +242,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         PARKING_LOT_NAME = parkingLots[PARKING_LOT_NUMBER - 1];
         spots = spots2; // Do like the parking_lot_name...
 
-        int spotHeight = (Resources.getSystem().getDisplayMetrics().heightPixels) / 15;
-        int spotWidth = (Resources.getSystem().getDisplayMetrics().widthPixels) / 23+5;
+        int spotHeight = (Resources.getSystem().getDisplayMetrics().heightPixels) / 10;
+        int spotWidth = (Resources.getSystem().getDisplayMetrics().widthPixels) / 11+5;
         Log.e("Screen size", String.valueOf(Resources.getSystem().getDisplayMetrics().heightPixels));
         Log.e("Screen size", String.valueOf(Resources.getSystem().getDisplayMetrics().heightPixels / 24));
 
@@ -255,10 +264,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         count = 0;
         countAll = 0;
         countX = 0;
-        int size = (spotWidth + spotGapingH + spotGapingH) * 7;
+        int size = (spotWidth + spotGapingH + spotGapingH) * 10;
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
+        Log.d("TEST", "setspots: " + dbHandler.getData());
         for (int index = 0; index < spots.length(); index++) {
             if (spots.charAt(index) == '/') {
                 layout = new LinearLayout(this);
@@ -305,8 +315,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                view.setBackgroundColor(Color.GREEN);
 //                view.setText(count + "");
 //                view.setText(dbHandler.getNameById(count));
-//                view.setText(dbHandler.nameFromId(count));
-                view.setText("13A");
+                view.setText(dbHandler.nameFromId(count));
+//                view.setText("13A");
 //                view.setAutoSizeTextTypeUniformWithConfiguration(3,10,1,TypedValue.COMPLEX_UNIT_DIP);
 //                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 3, 5, 1, TypedValue.COMPLEX_UNIT_DIP);
                 view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, spotWidth / 13 + additionByScreen); //spotWidth/13+4
@@ -327,6 +337,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 view.setText(PARKING_LOT_NAME);
                 view.setTextColor(Color.BLACK);
                 view.setGravity(Gravity.CENTER);
+                view.setTypeface(null, Typeface.BOLD);
                 view.setOnClickListener(this);
                 layout.addView(view);
                 countX++;
@@ -557,6 +568,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         BufferedReader reader;
         String[] splitedLine;
         String name;
+        int id;
         dbHandler.DeleteAll();
         try {
             final InputStream file = getAssets().open("Users.txt");
@@ -564,8 +576,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String line = reader.readLine();
             while (line != null) {
                 splitedLine = line.split("\\t"); // 1    12A
+                id = Integer.parseInt(splitedLine[0].replaceAll("\\uFEFF", ""));
                 name = splitedLine[1];
-                dbHandler.insertUserDetails(name, "green");
+                dbHandler.insertUserDetails(id,name, "green");
                 line = reader.readLine();
             }
             Toast.makeText(this, "Inserted new users", Toast.LENGTH_LONG).show();
@@ -589,7 +602,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             name = users[i];
             spotId = i+1;
 //            spotId = i;
-            dbHandler.insertUserDetails(name, "green");
+            dbHandler.insertUserDetails(spotId,name, "green");
             setNewUsers(spotId, name);
         }
     }
