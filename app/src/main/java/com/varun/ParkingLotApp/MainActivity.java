@@ -594,7 +594,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int id;
         dbHandler.DeleteAll();
         try {
-            final InputStream file = getAssets().open("Users.txt");
+            final InputStream file = getAssets().open("UsersPL.txt");
             reader = new BufferedReader(new InputStreamReader(file));
             String line = reader.readLine();
             while (line != null) {
