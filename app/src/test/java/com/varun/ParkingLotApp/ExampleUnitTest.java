@@ -1,4 +1,4 @@
-package com.varun.seatlayout;
+package com.varun.ParkingLotApp;
 
 import org.junit.Test;
 

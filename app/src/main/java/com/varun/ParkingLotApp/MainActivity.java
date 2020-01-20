@@ -1,79 +1,36 @@
-package com.varun.seatlayout;
+package com.varun.ParkingLotApp;
 
-import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.AlarmManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.os.Build;
-import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
-import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telephony.SmsManager;
-import android.telephony.SmsMessage;
-import android.text.Layout;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     static ViewGroup layout;
@@ -123,9 +80,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String PARKING_LOT_NAME = "";
     static String[] parkingLots = {"חניון נייק", "חניון גוונים", "חניון גוגל"};
     DbHandler dbHandler;
-        static public final String IP = "192.168.43.43"; // Phone Router
+//        static public final String IP = "192.168.43.43"; // Phone Router
 //    static public final String IP = "10.100.102.212"; // Home Router
-//    static public final String IP = "myseatingapp.ddns.net"; // Home Router
+    static public final String IP = "myseatingapp.ddns.net"; // Home Router
     static public final int PORT = 443;
     public Socket socket;
     public DataOutputStream dos;
@@ -140,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int[] myResources = {R.id.NameText, R.id.ShabbatParasha, R.id.HeadLineText, R.id.FirstText, R.id.SecondText, R.id.ThirdText, R.id.FourthText, R.id.FifthText};
     static int count, countAll, countX, first1, first2, first3;
     static int backgroundCount = 0, successfulConnection = 0;
-    static int currentStatus = 0, checkDBUpdate = 0, checkDBUpdateFirst = 1;
+    static int currentStatus = 0, checkDBUpdate = 0, checkDBUpdateFirst = 1, currParkingId;
     String statuses = "";
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -148,12 +105,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        checkForSmsPermission();
+//        checkForSmsPermission();
 //        String data = dbHelper.getData();
 //        Toast.makeText(this, data, Toast.LENGTH_LONG).show();
         dbHandler = new DbHandler(this);
-//        SQLiteDatabase db = dbHandler.getReadableDatabase();
-//        dbHandler.onUpgrade(db,2,3);
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        dbHandler.onUpgrade(db,2,3);
 //        dbHandler.insertUserDetails("י.בוחניק", "+972544991913", "1", "red");
 //        dbHandler.insertUserDetails("לוי", "+972549766158", "204");
 //        dbHandler.insertUserDetails("לוי", "+972549766158", "205");
@@ -173,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String data;
 //        Toast.makeText(this, "data: " +data, Toast.LENGTH_LONG).show();
         dbHandler.DeleteAll();
+        insertToDB();
         data = dbHandler.getData();
         if (data.equals("")) {
             insertToDB();
@@ -180,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         layout = findViewById(R.id.layoutSpot);
         SharedPreferences prefs = getSharedPreferences("loginPrefs", MODE_PRIVATE);
         Toast.makeText(this, "saved: " + prefs.getInt("ParkingLotNumber", 0), Toast.LENGTH_LONG).show();
-        if (prefs.getBoolean("isLoginKey", false)) {
+        if (prefs.getBoolean("isLoginKey", false) && prefs.getInt("ParkingLotNumber", 0)!=0) {
             PARKING_LOT_NUMBER = prefs.getInt("ParkingLotNumber", 0);
         } else {
             replaceFragment();
@@ -311,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 view.setPadding(0, 12, 0, 2 * spotGapingV);
                 view.setId(count);
                 view.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
-                view.setBackgroundResource(R.drawable.ic_car_green);
+                view.setBackgroundResource(R.drawable.ic_car_green_1);
 //                view.setBackgroundColor(Color.GREEN);
 //                view.setText(count + "");
 //                view.setText(dbHandler.getNameById(count));
@@ -372,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static void setMissing(int id) {
         TextView view = layout.findViewById(id);
-        view.setBackgroundResource(R.drawable.ic_car_green);
+        view.setBackgroundResource(R.drawable.ic_car_green_1);
         view.setTextColor(Color.BLACK);
         view.setTag(1);
     }
@@ -385,46 +343,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private void checkForSmsPermission() {
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.SEND_SMS) !=
-                PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.SEND_SMS},
-                    MY_PERMISSIONS_REQUEST_SEND_SMS);
-        }
-        //check if the permission is not granted
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
-            //if the permission is not been granted then check if the user has denied the permission
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECEIVE_SMS)) {
-                //Do nothing as user has denied
-                Toast.makeText(this, "no permission", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
-            } else {
-                //a pop up will appear asking for required permission i.e Allow or Deny
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        //will check the requestCode
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_RECEIVE_SMS: {
-                //check whether the length of grantResults is greater than 0 and is equal to PERMISSION_GRANTED
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //Now broadcastreceiver will work in background
-                    Toast.makeText(this, "Thank you for permitting!", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(this, "Well I can't do anything until you permit me", Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-    }
+//    private void checkForSmsPermission() {
+//        if (ActivityCompat.checkSelfPermission(this,
+//                Manifest.permission.SEND_SMS) !=
+//                PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.SEND_SMS},
+//                    MY_PERMISSIONS_REQUEST_SEND_SMS);
+//        }
+//        //check if the permission is not granted
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
+//            //if the permission is not been granted then check if the user has denied the permission
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECEIVE_SMS)) {
+//                //Do nothing as user has denied
+//                Toast.makeText(this, "no permission", Toast.LENGTH_LONG).show();
+//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
+//            } else {
+//                //a pop up will appear asking for required permission i.e Allow or Deny
+//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+//        //will check the requestCode
+//        switch (requestCode) {
+//            case MY_PERMISSIONS_REQUEST_RECEIVE_SMS: {
+//                //check whether the length of grantResults is greater than 0 and is equal to PERMISSION_GRANTED
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    //Now broadcastreceiver will work in background
+//                    Toast.makeText(this, "Thank you for permitting!", Toast.LENGTH_LONG).show();
+//                } else {
+//                    Toast.makeText(this, "Well I can't do anything until you permit me", Toast.LENGTH_LONG).show();
+//                }
+//            }
+//        }
+//    }
 
     @Override
     public void onClick(View view) {
+        currParkingId = view.getId();
+        Log.d("ONCLICK: ", "currId: " + currParkingId);
+        Thread getUserThread = new Thread(new getUserThread());
+        getUserThread.start();
 //        int[] backgrounds = {R.drawable.b1,R.drawable.b2,R.drawable.b3,R.drawable.b4,R.drawable.b5,R.drawable.b6,R.drawable.b7,R.drawable.b8,R.drawable.b9,R.drawable.b10, R.drawable.b11, R.drawable.b12, R.drawable.b13};
 //        backgroundCount++;
 //        if (backgroundCount>backgrounds.length-1){backgroundCount=0;}
@@ -462,6 +424,71 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        }
     }
 
+    class getUserThread implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(IP, PORT), 5000);
+                socket.setSoTimeout(5000);
+                if (socket == null) {
+                    successfulConnection = 0;
+                    return;
+                }
+                successfulConnection = 1;
+                dos = new DataOutputStream(socket.getOutputStream());
+                String message;
+                message = "1 get user " + Integer.toString(currParkingId) + " " + (MainActivity.PARKING_LOT_NUMBER - 1);
+                String receivedMsg = "";
+                dos.writeUTF(message);
+                dos.flush();
+                dos = new DataOutputStream(socket.getOutputStream());
+                is = socket.getInputStream();
+                byte[] buffer, bufferLen;
+                String receivedMsgLong = "";
+                int messagelen = 0;
+                bufferLen = new byte[2];
+                is.read(bufferLen);
+                receivedMsg = new String(bufferLen, "UTF-8");
+                Log.d("getUser", "Received 1: " + receivedMsg);
+                if (receivedMsg.equals("00")) {
+                    dos.writeUTF("received");
+                    dos.flush();
+                } else {
+                    buffer = new byte[Integer.parseInt(receivedMsg.trim())];
+                    dos.writeUTF("received");
+                    dos.flush();
+                    is.read(buffer);
+                    receivedMsg = new String(buffer, "UTF-8");
+                    dos.writeUTF("received");
+                    dos.flush();
+                    if (receivedMsg != null) {
+                        final Semaphore mutex = new Semaphore(0);
+                        final String name = receivedMsg;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainActivity.this, dbHandler.nameFromId(currParkingId)+": " + name,Toast.LENGTH_LONG).show();
+                                mutex.release();
+                            }
+                        });
+                        try {
+                            mutex.acquire();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Log.d("getUser", "Error Receiving user");
+                    }
+                }
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     class getStatusesThread implements Runnable {
 
         @Override
@@ -474,8 +501,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         c.start();
                         c.join();
                     }
-                    checkDBUpdate++;
-                    Thread.sleep(1000);
+//                    Thread.sleep(1000);
                     socket = new Socket(MainActivity.IP, MainActivity.PORT);
                     dos = new DataOutputStream(socket.getOutputStream());
                     String message;
@@ -497,7 +523,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     is.read(buffer);
                     receivedMsg = new String(buffer, "UTF-8");
                     if (receivedMsg != null) {
-                        if (!receivedMsg.equals(statuses)) {
+                        if (!receivedMsg.equals(statuses) || 1==1) {
                             statuses = receivedMsg;
                             final Semaphore mutex = new Semaphore(0);
                             runOnUiThread(new Runnable() {
@@ -544,19 +570,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d("getStatuses", "Error Receiving statuses");
                     }
                     socket.close();
-                    if (checkDBUpdate == 3) {
-                        checkDBUpdate = 0;
-                        Thread c = new Thread(new updateDbThread());
-                        c.start();
-                        c.join();
-                    }
+                    Thread.sleep(15000);
+//                    checkDBUpdate++;
+//                    if (checkDBUpdate == 8) {
+//                        checkDBUpdate = 0;
+//                        Thread c = new Thread(new updateDbThread());
+//                        c.start();
+//                        c.join();
+//                    }
                 } catch (IOException e) {
                     e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    Thread.sleep(14000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -590,7 +613,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void insertToDBUpdated(String[] users) {
         String name;
         int spotId;
-//        String[] splitedLine;
+        String[] splitedLine;
         dbHandler.DeleteAll();
         for (int i = 0; i < users.length; i++) {
             if (i > 0) {
@@ -598,8 +621,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 }
             }
-//            splitedLine = users[i].split(" "); //\\\s+
-            name = users[i];
+            splitedLine = users[i].split("\\s+"); //\\\s+
+            name = splitedLine[1];
             spotId = i+1;
 //            spotId = i;
             dbHandler.insertUserDetails(spotId,name, "green");
@@ -616,7 +639,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            view.setTextColor(Color.GRAY);
 //            view.setTag(1);
 //        }
-        view.setBackgroundResource(R.drawable.ic_car_green);
+        view.setBackgroundResource(R.drawable.ic_car_green_1);
         view.setTextColor(Color.GRAY);
         view.setTag(1);
     }

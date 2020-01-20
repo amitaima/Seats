@@ -1,4 +1,4 @@
-package com.varun.seatlayout;
+package com.varun.ParkingLotApp;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

@@ -1,14 +1,11 @@
-package com.varun.seatlayout;
+package com.varun.ParkingLotApp;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.Calendar;

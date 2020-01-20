@@ -1,4 +1,4 @@
-package com.varun.seatlayout;
+package com.varun.ParkingLotApp;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,7 +11,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.util.Date;
 
 public class AlarmReceiver extends BroadcastReceiver {
     public Socket socket;
