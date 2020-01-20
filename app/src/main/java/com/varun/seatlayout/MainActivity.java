@@ -73,7 +73,6 @@ import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-
 import pl.droidsonroids.gif.GifImageView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -214,12 +213,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        checkForSmsPermission();
+//        checkForSmsPermission();
 //        String data = dbHelper.getData();
 //        Toast.makeText(this, data, Toast.LENGTH_LONG).show();
         dbHandler = new DbHandler(this);
-//        SQLiteDatabase db = dbHandler.getReadableDatabase();
-//        dbHandler.onUpgrade(db,1,2);
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        dbHandler.onUpgrade(db,1,2);
 //        dbHandler.insertUserDetails("י.בוחניק", "+972544991913", "1", "red");
 //        dbHandler.insertUserDetails("לוי", "+972549766158", "204");
 //        dbHandler.insertUserDetails("לוי", "+972549766158", "205");
@@ -246,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         layout = findViewById(R.id.layoutSeat);
         SharedPreferences prefs = getSharedPreferences("loginPrefs", MODE_PRIVATE);
         Toast.makeText(this, "saved: " + prefs.getInt("BeitKnesetNumber",0), Toast.LENGTH_LONG).show();
-        if (prefs.getBoolean("isLoginKey",false)){
+        if (prefs.getBoolean("isLoginKey",false) && prefs.getInt("BeitKnesetNumber",0)!=0){
             BEIT_KNESET_NUMBER = prefs.getInt("BeitKnesetNumber",0);
         }else{
             replaceFragment();
@@ -633,156 +632,156 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         view.setTag(2);
     }
 
-    public static void smsSendMessage(String phoneNumber, String msg) {
-        // Phone number of user.
-        String destinationAddress = phoneNumber; //Phone number from DataBase
-        // Text to send to user.
-        String smsMessage = msg;
-        // Set the service center address if needed, otherwise null.
-        String scAddress = null;
-        // Set pending intents to broadcast
-        // when message sent and when delivered, or set to null.
-        PendingIntent sentIntent = null, deliveryIntent = null;
-        // Use SmsManager.
-        SmsManager smsManager = SmsManager.getDefault();
-        ArrayList<String> parts = smsManager.divideMessage(smsMessage);
-        smsManager.sendMultipartTextMessage(destinationAddress, null, parts, null, null);
-//        smsManager.sendTextMessage
-//                (destinationAddress, scAddress, smsMessage,
-//                        sentIntent, deliveryIntent);
-        Log.d("smsSender", "smsSendMessage: Sent message");
-    }
-
-//    public class smsReceiver extends BroadcastReceiver {
-//        private final String TAG =
-//                smsReceiver.class.getSimpleName();
-//        public static final String pdu_type = "pdus";
-//
-//        @TargetApi(Build.VERSION_CODES.M)
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            // Get the SMS message.
-//            Bundle bundle = intent.getExtras();
-//            SmsMessage[] msgs;
-//            String strMessage = "";
-//            String format = bundle.getString("format");
-//            // Retrieve the SMS message received.
-//            Object[] pdus = (Object[]) bundle.get(pdu_type);
-//            if (pdus != null) {
-//                // Check the Android version.
-//                boolean isVersionM =
-//                        (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M);
-//                // Fill the msgs array.
-//                msgs = new SmsMessage[pdus.length];
-//                for (int i = 0; i < msgs.length; i++) {
-//                    // Check Android version and use appropriate createFromPdu.
-//                    if (isVersionM) {
-//                        // If Android version M or newer:
-//                        msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i], format);
-//                    } else {
-//                        // If Android version L or older:
-//                        msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-//                    }
-//                    // Build the message to show.
-//                    strMessage += "SMS from " + msgs[i].getOriginatingAddress();
-//                    strMessage += " :" + msgs[i].getMessageBody() + "\n";
-//                    // Log and display the SMS message.
-//                    Log.d(TAG, "onReceive: " + strMessage);
-//                    Toast.makeText(context, strMessage, Toast.LENGTH_LONG).show();
-//                }
-//            }
-//        }
+//    public static void smsSendMessage(String phoneNumber, String msg) {
+//        // Phone number of user.
+//        String destinationAddress = phoneNumber; //Phone number from DataBase
+//        // Text to send to user.
+//        String smsMessage = msg;
+//        // Set the service center address if needed, otherwise null.
+//        String scAddress = null;
+//        // Set pending intents to broadcast
+//        // when message sent and when delivered, or set to null.
+//        PendingIntent sentIntent = null, deliveryIntent = null;
+//        // Use SmsManager.
+//        SmsManager smsManager = SmsManager.getDefault();
+//        ArrayList<String> parts = smsManager.divideMessage(smsMessage);
+//        smsManager.sendMultipartTextMessage(destinationAddress, null, parts, null, null);
+////        smsManager.sendTextMessage
+////                (destinationAddress, scAddress, smsMessage,
+////                        sentIntent, deliveryIntent);
+//        Log.d("smsSender", "smsSendMessage: Sent message");
 //    }
-
-//    public class smsReceiver extends BroadcastReceiver {
-//        private static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
-//        private static final String TAG = "SmsBroadcastReceiver";
-//        String msg, phoneNo = "";
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            //retrieves the general action to be performed and display on log
-//            Log.i(TAG, "Intent Received: " +intent.getAction());
-//            if (intent.getAction()==SMS_RECEIVED)
+//
+////    public class smsReceiver extends BroadcastReceiver {
+////        private final String TAG =
+////                smsReceiver.class.getSimpleName();
+////        public static final String pdu_type = "pdus";
+////
+////        @TargetApi(Build.VERSION_CODES.M)
+////        @Override
+////        public void onReceive(Context context, Intent intent) {
+////            // Get the SMS message.
+////            Bundle bundle = intent.getExtras();
+////            SmsMessage[] msgs;
+////            String strMessage = "";
+////            String format = bundle.getString("format");
+////            // Retrieve the SMS message received.
+////            Object[] pdus = (Object[]) bundle.get(pdu_type);
+////            if (pdus != null) {
+////                // Check the Android version.
+////                boolean isVersionM =
+////                        (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M);
+////                // Fill the msgs array.
+////                msgs = new SmsMessage[pdus.length];
+////                for (int i = 0; i < msgs.length; i++) {
+////                    // Check Android version and use appropriate createFromPdu.
+////                    if (isVersionM) {
+////                        // If Android version M or newer:
+////                        msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i], format);
+////                    } else {
+////                        // If Android version L or older:
+////                        msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+////                    }
+////                    // Build the message to show.
+////                    strMessage += "SMS from " + msgs[i].getOriginatingAddress();
+////                    strMessage += " :" + msgs[i].getMessageBody() + "\n";
+////                    // Log and display the SMS message.
+////                    Log.d(TAG, "onReceive: " + strMessage);
+////                    Toast.makeText(context, strMessage, Toast.LENGTH_LONG).show();
+////                }
+////            }
+////        }
+////    }
+//
+////    public class smsReceiver extends BroadcastReceiver {
+////        private static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+////        private static final String TAG = "SmsBroadcastReceiver";
+////        String msg, phoneNo = "";
+////        @Override
+////        public void onReceive(Context context, Intent intent) {
+////            //retrieves the general action to be performed and display on log
+////            Log.i(TAG, "Intent Received: " +intent.getAction());
+////            if (intent.getAction()==SMS_RECEIVED)
+////            {
+////                //retrieves a map of extended data from the intent
+////                Bundle dataBundle = intent.getExtras();
+////                if (dataBundle!=null)
+////                {
+////                    //creating PDU(Protocol Data Unit) object which is a protocol for transferring message
+////                    Object[] mypdu = (Object[])dataBundle.get("pdus");
+////                    final SmsMessage[] message = new SmsMessage[mypdu.length];
+////
+////                    for (int i = 0; i<mypdu.length; i++)
+////                    {
+////                        //for build versions >= API Level 23
+////                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+////                        {
+////                            String format = dataBundle.getString("format");
+////                            //From PDU we get all object and SmsMessage Object using following line of code
+////                            message[i] = SmsMessage.createFromPdu((byte[])mypdu[i], format);
+////                        }
+////                        else
+////                        {
+////                            //<API level 23
+////                            message[i] = SmsMessage.createFromPdu((byte[])mypdu[i]);
+////                        }
+////                        msg = message[i].getMessageBody();
+////                        phoneNo = message[i].getOriginatingAddress();
+////                    }
+////                    Toast.makeText(context, "Message: " +msg +"\nNumber: " +phoneNo, Toast.LENGTH_LONG).show();
+////                }
+////            }
+////        }
+////    }
+//
+//
+//    private void checkForSmsPermission() {
+//        if (ActivityCompat.checkSelfPermission(this,
+//                Manifest.permission.SEND_SMS) !=
+//                PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.SEND_SMS},
+//                    MY_PERMISSIONS_REQUEST_SEND_SMS);
+//        }
+//        //check if the permission is not granted
+//        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)!= PackageManager.PERMISSION_GRANTED)
+//        {
+//            //if the permission is not been granted then check if the user has denied the permission
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECEIVE_SMS))
 //            {
-//                //retrieves a map of extended data from the intent
-//                Bundle dataBundle = intent.getExtras();
-//                if (dataBundle!=null)
-//                {
-//                    //creating PDU(Protocol Data Unit) object which is a protocol for transferring message
-//                    Object[] mypdu = (Object[])dataBundle.get("pdus");
-//                    final SmsMessage[] message = new SmsMessage[mypdu.length];
+//                //Do nothing as user has denied
+//                Toast.makeText(this, "no permission", Toast.LENGTH_LONG).show();
+//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
+//            }
+//            else
+//            {
+//                //a pop up will appear asking for required permission i.e Allow or Deny
+//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
+//            }
+//        }
+//    }
 //
-//                    for (int i = 0; i<mypdu.length; i++)
-//                    {
-//                        //for build versions >= API Level 23
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-//                        {
-//                            String format = dataBundle.getString("format");
-//                            //From PDU we get all object and SmsMessage Object using following line of code
-//                            message[i] = SmsMessage.createFromPdu((byte[])mypdu[i], format);
-//                        }
-//                        else
-//                        {
-//                            //<API level 23
-//                            message[i] = SmsMessage.createFromPdu((byte[])mypdu[i]);
-//                        }
-//                        msg = message[i].getMessageBody();
-//                        phoneNo = message[i].getOriginatingAddress();
-//                    }
-//                    Toast.makeText(context, "Message: " +msg +"\nNumber: " +phoneNo, Toast.LENGTH_LONG).show();
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+//    {
+//        //will check the requestCode
+//        switch(requestCode)
+//        {
+//            case MY_PERMISSIONS_REQUEST_RECEIVE_SMS:
+//            {
+//                //check whether the length of grantResults is greater than 0 and is equal to PERMISSION_GRANTED
+//                if (grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED)
+//                {
+//                    //Now broadcastreceiver will work in background
+//                    Toast.makeText(this, "Thank you for permitting!", Toast.LENGTH_LONG).show();
+//                }
+//                else
+//                {
+//                    Toast.makeText(this, "Well I can't do anything until you permit me", Toast.LENGTH_LONG).show();
 //                }
 //            }
 //        }
 //    }
-
-
-    private void checkForSmsPermission() {
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.SEND_SMS) !=
-                PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.SEND_SMS},
-                    MY_PERMISSIONS_REQUEST_SEND_SMS);
-        }
-        //check if the permission is not granted
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)!= PackageManager.PERMISSION_GRANTED)
-        {
-            //if the permission is not been granted then check if the user has denied the permission
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECEIVE_SMS))
-            {
-                //Do nothing as user has denied
-                Toast.makeText(this, "no permission", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
-            }
-            else
-            {
-                //a pop up will appear asking for required permission i.e Allow or Deny
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
-    {
-        //will check the requestCode
-        switch(requestCode)
-        {
-            case MY_PERMISSIONS_REQUEST_RECEIVE_SMS:
-            {
-                //check whether the length of grantResults is greater than 0 and is equal to PERMISSION_GRANTED
-                if (grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED)
-                {
-                    //Now broadcastreceiver will work in background
-                    Toast.makeText(this, "Thank you for permitting!", Toast.LENGTH_LONG).show();
-                }
-                else
-                {
-                    Toast.makeText(this, "Well I can't do anything until you permit me", Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-    }
 
     @Override
     public void onClick(View view) {
@@ -936,7 +935,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String name,phoneNumber,seatId;
         dbHandler.DeleteAll();
         try{
-            final InputStream file = getAssets().open("Users.txt");
+            final InputStream file = getAssets().open("UsersBK.txt");
             reader = new BufferedReader(new InputStreamReader(file));
             String line=reader.readLine();
             while(line != null){
