@@ -201,11 +201,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String[] toWrite = {BEIT_KNESET_NAME, "שבת פרשת: ","", "", "", "", "", ""};
     String[] toWrite2 = {BEIT_KNESET_NAME, "שבת פרשת: ","הודעות:", "", "", "", "", ""};
     String[] defaultWrite = {BEIT_KNESET_NAME, "שבת פרשת: ","הודעות:", "", "", "", "", ""};
-    String[] noChangeText = {BEIT_KNESET_NAME, "שבת פרשת: ", "לעילוי נשמת:", "יוסף מלכה בר רחל", "רחל מלכה בת חנה", "הלנה פנקסוביץ'", "משה לייב פנקסוביץ'", ""};
-    int[] myResources = {R.id.NameText,R.id.ShabbatParasha,R.id.HeadLineText,R.id.FirstText,R.id.SecondText,R.id.ThirdText,R.id.FourthText,R.id.FifthText};
+    String[] noChangeText = {BEIT_KNESET_NAME, "שבת פרשת: ", "לעילוי נשמת", "יוסף מלכה בר רחל", "רחל מלכה בת חנה", "הלנה פנקסוביץ'", "משה לייב פנקסוביץ'", ""};
     static int count, countAll, countX, first1,first2,first3;
+    int[] myResources = {R.id.NameText,R.id.ShabbatParasha,R.id.HeadLineText,R.id.FirstText,R.id.SecondText,R.id.ThirdText,R.id.FourthText,R.id.FifthText};
+    String[] inMemoryNames = {"","","","","","","","",""};
     static int backgroundCount=0, successfulConnection=0;
-    static int currentStatus=0, checkDBUpdate=0, checkDBUpdateFirst=1;
+    static int currentStatus=0, checkDBUpdate=0,getInMemories=0, checkDBUpdateFirst=1;
     String statuses = "";
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -915,6 +916,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         c.start();
                         c.join();
                     }
+                    if (getInMemories==5){
+                        getInMemories = 0;
+                        Thread d = new Thread(new updateMemoriesThread());
+                        d.start();
+                        d.join();
+                    }
+                    getInMemories++;
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
@@ -1177,6 +1185,68 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 //    }
 
+    String[] memories;
+    class updateMemoriesThread implements Runnable {
+
+        @Override
+        public void run() {
+                try {
+                    //                    socket = new Socket(IP, PORT);
+                    socket = new Socket();
+                    socket.connect(new InetSocketAddress(IP, PORT), 5000);
+                    socket.setSoTimeout(5000);
+                    if (socket == null) {
+                        //                        Toast.makeText(getBaseContext(), "Could not connect to the server\nPlease check your internet connection and try again.", Toast.LENGTH_LONG).show();
+                        successfulConnection = 0;
+                        return;
+                    }
+                    successfulConnection = 1;
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    String message;
+                    message = "0 get memory " + (MainActivity.BEIT_KNESET_NUMBER-1);
+                    String receivedMsg = "";
+                    dos.writeUTF(message);
+                    dos.flush();
+                    dos = new DataOutputStream(socket.getOutputStream());
+                    byte[] bufferSize = new byte[3];
+                    is = socket.getInputStream();
+                    is.read(bufferSize);
+                    receivedMsg = new String(bufferSize, "UTF-8");
+                    Log.d("getMemories", "Received memory1: " + receivedMsg);
+                    if (!receivedMsg.equals("000")) {
+                        byte[] buffer = new byte[Integer.parseInt(receivedMsg)];
+                        message = "received num";
+                        dos.writeUTF(message);
+                        dos.flush();
+                        is = socket.getInputStream();
+                        is.read(buffer);
+                        receivedMsg = new String(buffer, "UTF-8");
+                        if (receivedMsg != null) {
+                            memories = receivedMsg.split("\n");
+                            Log.d("getMemories", "Received memory2: " + receivedMsg);
+                            inMemoryNames[0] = "";
+                            inMemoryNames[1] = "";
+                            inMemoryNames[2] = "";
+                            inMemoryNames[3] = "";
+                            inMemoryNames[4] = "";
+                            inMemoryNames[5] = "";
+                            inMemoryNames[6] = "";
+                            inMemoryNames[7] = "";
+                            inMemoryNames[8] = "";
+                            for (int z = 0; z < memories.length; z++) {
+                                inMemoryNames[z] = memories[z];
+                            }
+                        } else {
+                            Log.d("getMemories", "Error Receiving messages");
+                        }
+                        socket.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+    }
+
     class updateDbThread implements Runnable {
 
         @Override
@@ -1405,33 +1475,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                }
 //            }
 //        }
-        String[] names = {"שרה בת רחל","שמשמון בן יובב הכהן", "שמחה בת ששון", "בני בן ביבי", "נתן בן שמעון", "יוסי בן מנש"};
         TextView candle1 = findViewById(R.id.candleName1);
         TextView candle2 = findViewById(R.id.candleName2);
         TextView candle3 = findViewById(R.id.candleName3);
         GifImageView gif1 = findViewById(R.id.ad1);
         GifImageView gif2 = findViewById(R.id.ad2);
         GifImageView gif3 = findViewById(R.id.ad3);
+        int stopNum = 9;
         @Override
         public void run() {
             while (true){
+                if (inMemoryNames[3]==""){stopNum=3;}
+                else if(inMemoryNames[6]==""){stopNum=6;}
+                else {stopNum=9;}
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        candle1.setText(names[x]);
-                        candle2.setText(names[x+1]);
-                        candle3.setText(names[x+2]);
+                        candle1.setText(inMemoryNames[x]);
+                        candle2.setText(inMemoryNames[x+1]);
+                        candle3.setText(inMemoryNames[x+2]);
                     }
                 });
                 x=x+3;
-                if (x==6){x=0;}
+                if (x==stopNum) {x=0;}
                 try {
                     gif2.setImageResource(R.drawable.candle);
                     Thread.sleep(325);
                     gif1.setImageResource(R.drawable.candle);
                     Thread.sleep(275);
                     gif3.setImageResource(R.drawable.candle);
-                    Thread.sleep(4400);
+                    Thread.sleep(9400);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
