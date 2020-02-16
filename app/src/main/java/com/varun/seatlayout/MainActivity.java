@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int[] myResources = {R.id.NameText,R.id.ShabbatParasha,R.id.HeadLineText,R.id.FirstText,R.id.SecondText,R.id.ThirdText,R.id.FourthText,R.id.FifthText};
     String[] inMemoryNames = {"","","","","","","","",""};
     static int backgroundCount=0, successfulConnection=0;
-    static int currentStatus=0, checkDBUpdate=0,getInMemories=0, checkDBUpdateFirst=1;
+    static int currentStatus=0, checkDBUpdate=0,getInMemories=5, checkDBUpdateFirst=1;
     String statuses = "";
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -245,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         layout = findViewById(R.id.layoutSeat);
         SharedPreferences prefs = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+
         Toast.makeText(this, "saved: " + prefs.getInt("BeitKnesetNumber",0), Toast.LENGTH_LONG).show();
         if (prefs.getBoolean("isLoginKey",false) && prefs.getInt("BeitKnesetNumber",0)!=0){
             BEIT_KNESET_NUMBER = prefs.getInt("BeitKnesetNumber",0);
@@ -1234,6 +1235,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             inMemoryNames[7] = "";
                             inMemoryNames[8] = "";
                             for (int z = 0; z < memories.length; z++) {
+                                if (memories[z].equals(memories[0]) && z!=0) {
+                                    break;
+                                }
                                 inMemoryNames[z] = memories[z];
                             }
                         } else {
@@ -1494,20 +1498,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         candle1.setText(inMemoryNames[x]);
                         candle2.setText(inMemoryNames[x+1]);
                         candle3.setText(inMemoryNames[x+2]);
+                        gif2.setImageResource(R.drawable.candle);
                     }
                 });
-                x=x+3;
-                if (x==stopNum) {x=0;}
                 try {
-                    gif2.setImageResource(R.drawable.candle);
                     Thread.sleep(325);
-                    gif1.setImageResource(R.drawable.candle);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        gif1.setImageResource(R.drawable.candle);
+                    }
+                });
+                try {
                     Thread.sleep(275);
-                    gif3.setImageResource(R.drawable.candle);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        gif3.setImageResource(R.drawable.candle);
+                    }
+                });
+                try {
                     Thread.sleep(9400);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+//                gif2.setImageResource(R.drawable.candle);
+//                Thread.sleep(325);
+//                gif1.setImageResource(R.drawable.candle);
+//                Thread.sleep(275);
+//                gif3.setImageResource(R.drawable.candle);
+//                Thread.sleep(9400);
+                x=x+3;
+                if (x==stopNum) {x=0;}
             }
         }
     }

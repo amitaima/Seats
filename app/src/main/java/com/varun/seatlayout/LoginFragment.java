@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -53,9 +54,10 @@ public class LoginFragment extends Fragment {
 
         passwordButton = myView.findViewById(R.id.submit_button);
         passwordInput = myView.findViewById(R.id.password_editText);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            loginPreferences = getContext().getSharedPreferences("loginPrefs", MODE_PRIVATE);
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            loginPreferences = getContext().getSharedPreferences("loginPrefs", MODE_PRIVATE);
+//        }
+        loginPreferences = getActivity().getSharedPreferences("loginPrefs", MODE_PRIVATE);
         loginPrefsEditor = loginPreferences.edit();
 
         passwordInput.setHint("סיסמה");
