@@ -971,12 +971,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String[] splitedLine;
         dbHandler.DeleteAll();
         for (int i=0; i<users.length; i++){
-            if (i>0){
-                if (users[i].equals(users[0])){
-                    break;
-                }
+            if (users[i].equals(users[0]) && i!=0){
+                break;
             }
-            splitedLine = users[i].split(" "); //\\\s+
+            splitedLine = users[i].split("\t"); //\\\s+
             if (splitedLine.length == 3){
                 name = splitedLine[1];
                 if (name.equals("פנוי")){
@@ -989,7 +987,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 dbHandler.insertUserDetails(name,phoneNumber,seatId, "red");
                 setNewUsers(Integer.parseInt(seatId), name);
             } else {
-//                Log.d("Check", "insertToDBUpdated: " + splitedLine[0] + " " + splitedLine[1] + " "  + splitedLine[2]);
+                Log.d("Check", "insertToDBUpdated: " + users[i]);
                 name = splitedLine[1] + " " + splitedLine[2];
                 if (name.equals("פנוי")){
 //                    setMissing(Integer.parseInt(seatId));
