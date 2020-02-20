@@ -1,15 +1,25 @@
 package com.varun.ParkingLotApp;
 
+import android.Manifest;
+import android.animation.Animator;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,14 +33,27 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+//import com.getbase.floatingactionbutton.FloatingActionButton;
+//import com.getbase.floatingactionbutton.FloatingActionsMenu;
+
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     static ViewGroup layout;
@@ -93,11 +116,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int UPDATE_spotS = 4;
     int RESET_spotS = 5;
     String selectedIds = "";
+    boolean isFABOpen = false;
+    FloatingActionButton fab, fab1, fab2, fab3;
+    LinearLayout fabLayout1, fabLayout2, fabLayout3;
+    View fabBGLayout;
 
     int[] myResources = {R.id.NameText, R.id.ShabbatParasha, R.id.HeadLineText, R.id.FirstText, R.id.SecondText, R.id.ThirdText, R.id.FourthText, R.id.FifthText};
     static int count, countAll, countX, first1, first2, first3;
     static int backgroundCount = 0, successfulConnection = 0;
-    static int currentStatus = 0, checkDBUpdate = 0, checkDBUpdateFirst = 1, currParkingId;
+    static int currentStatus = 0, checkDBUpdate = 0, checkDBUpdateFirst = 1, currParkingId,statusListType=0;
     String statuses = "";
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -105,6 +132,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE}, 1);
+        }
 //        checkForSmsPermission();
 //        String data = dbHelper.getData();
 //        Toast.makeText(this, data, Toast.LENGTH_LONG).show();
@@ -143,6 +173,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             replaceFragment();
         }
+
+        fabLayout1 = (LinearLayout) findViewById(R.id.fabLayout1);
+        fabLayout2 = (LinearLayout) findViewById(R.id.fabLayout2);
+        fabLayout3 = (LinearLayout) findViewById(R.id.fabLayout3);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab1 = (FloatingActionButton) findViewById(R.id.fab1);
+        fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        fab3 = (FloatingActionButton) findViewById(R.id.fab3);
+        fabBGLayout = findViewById(R.id.fabBGLayout);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isFABOpen) {
+                    showFABMenu();
+                } else {
+                    closeFABMenu();
+                }
+            }
+        });
+
+        fab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                statusListType=2; // day
+                Thread download = new Thread(new getStatusList());
+                download.start();
+            }
+        });
+
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                statusListType=1; // week
+                Thread download = new Thread(new getStatusList());
+                download.start();
+            }
+        });
+
+        fab3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                statusListType=0; // month
+                Thread download = new Thread(new getStatusList());
+                download.start();
+            }
+        });
+
+        fabBGLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                closeFABMenu();
+            }
+        });
 
         Thread setup = new Thread(new setupThread());
         setup.start();
@@ -226,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
-        Log.d("TEST", "setspots: " + dbHandler.getData());
+//        Log.d("TEST", "setspots: " + dbHandler.getData());
         for (int index = 0; index < spots.length(); index++) {
             if (spots.charAt(index) == '/') {
                 layout = new LinearLayout(this);
@@ -343,43 +427,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-//    private void checkForSmsPermission() {
-//        if (ActivityCompat.checkSelfPermission(this,
-//                Manifest.permission.SEND_SMS) !=
-//                PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(this,
-//                    new String[]{Manifest.permission.SEND_SMS},
-//                    MY_PERMISSIONS_REQUEST_SEND_SMS);
-//        }
-//        //check if the permission is not granted
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
-//            //if the permission is not been granted then check if the user has denied the permission
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECEIVE_SMS)) {
-//                //Do nothing as user has denied
-//                Toast.makeText(this, "no permission", Toast.LENGTH_LONG).show();
-//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
-//            } else {
-//                //a pop up will appear asking for required permission i.e Allow or Deny
-//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECEIVE_SMS}, MY_PERMISSIONS_REQUEST_RECEIVE_SMS);
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-//        //will check the requestCode
-//        switch (requestCode) {
-//            case MY_PERMISSIONS_REQUEST_RECEIVE_SMS: {
-//                //check whether the length of grantResults is greater than 0 and is equal to PERMISSION_GRANTED
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    //Now broadcastreceiver will work in background
-//                    Toast.makeText(this, "Thank you for permitting!", Toast.LENGTH_LONG).show();
-//                } else {
-//                    Toast.makeText(this, "Well I can't do anything until you permit me", Toast.LENGTH_LONG).show();
-//                }
-//            }
-//        }
-//    }
+    private void requestAppPermissions() {
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            return;
+        }
+
+        if (hasReadPermissions() && hasWritePermissions()) {
+            return;
+        }
+
+        ActivityCompat.requestPermissions(this,
+                new String[] {
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, 1); // your request code
+    }
+
+    private boolean hasReadPermissions() {
+        return (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private boolean hasWritePermissions() {
+        return (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+    }
 
     @Override
     public void onClick(View view) {
@@ -424,15 +494,74 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        }
     }
 
+    private void showFABMenu() {
+        isFABOpen = true;
+        fabLayout1.setVisibility(View.VISIBLE);
+        fabLayout2.setVisibility(View.VISIBLE);
+        fabLayout3.setVisibility(View.VISIBLE);
+        fabBGLayout.setVisibility(View.VISIBLE);
+        fab.animate().rotationBy(180);
+        fabLayout1.animate().translationY(-getResources().getDimension(R.dimen.standard_55));
+        fabLayout2.animate().translationY(-getResources().getDimension(R.dimen.standard_100));
+        fabLayout3.animate().translationY(-getResources().getDimension(R.dimen.standard_145));
+    }
+
+    private void closeFABMenu() {
+        isFABOpen = false;
+        fabBGLayout.setVisibility(View.GONE);
+        fab.animate().rotation(0);
+        fabLayout1.animate().translationY(0);
+        fabLayout2.animate().translationY(0);
+        fabLayout3.animate().translationY(0);
+        fabLayout3.animate().translationY(0).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                if (!isFABOpen) {
+                    fabLayout1.setVisibility(View.GONE);
+                    fabLayout2.setVisibility(View.GONE);
+                    fabLayout3.setVisibility(View.GONE);
+                }
+/*                if (fab.getRotation() != -180) {
+                    fab.setRotation(-180);
+                }*/
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isFABOpen) {
+            closeFABMenu();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     class getUserThread implements Runnable {
 
         @Override
         public void run() {
             try {
-                socket = new Socket();
-                socket.connect(new InetSocketAddress(IP, PORT), 5000);
-                socket.setSoTimeout(5000);
-                if (socket == null) {
+                try {
+                    socket = new Socket();
+                    socket.connect(new InetSocketAddress(IP, PORT), 5000);
+                }   catch (SocketTimeoutException e){
+//                    Snackbar.make(findViewById(R.id.main_layout), "Failed to connect to the internet, please try again later!", Snackbar.LENGTH_LONG).show();
                     successfulConnection = 0;
                     return;
                 }
@@ -453,6 +582,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 receivedMsg = new String(bufferLen, "UTF-8");
                 Log.d("getUser", "Received 1: " + receivedMsg);
                 if (receivedMsg.equals("00")) {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "Parking spot not taken",Toast.LENGTH_LONG).show();
+                        }
+                    });
                     dos.writeUTF("received");
                     dos.flush();
                 } else {
@@ -501,8 +635,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         c.start();
                         c.join();
                     }
-//                    Thread.sleep(1000);
-                    socket = new Socket(MainActivity.IP, MainActivity.PORT);
+                    try {
+                        socket = new Socket();
+                        socket.connect(new InetSocketAddress(IP, PORT), 5000);
+                    }   catch (SocketTimeoutException e){
+//                        Snackbar.make(findViewById(R.id.fab), "Failed to connect to the internet, please try again later!", Snackbar.LENGTH_LONG).show();
+                        successfulConnection = 0;
+                        return;
+                    }
+//                    socket.setSoTimeout(5000);
+//                    if (socket == null) {
+//                        Snackbar snackbar = Snackbar
+//                                .make(getWindow().getDecorView().getRootView(), "Failed to connect to the internet, please try again!", Snackbar.LENGTH_LONG)
+//                                .setAction("RETRY", new View.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(View view) {
+//                                        Thread a = new Thread(new getStatusList());
+//                                        a.start();
+//                                        successfulConnection = 0;
+//                                        return;
+//                                    }
+//                                });
+//                        snackbar.show();
+//                        Toast.makeText(MainActivity.this, "Parking spot not taken",Toast.LENGTH_LONG).show();
+//                        successfulConnection = 0;
+//                        return;
+//                    }
+                    successfulConnection=1;
                     dos = new DataOutputStream(socket.getOutputStream());
                     String message;
                     message = "1 get statuses " + (MainActivity.PARKING_LOT_NUMBER - 1);
@@ -652,10 +811,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void run() {
             try {
-                socket = new Socket();
-                socket.connect(new InetSocketAddress(IP, PORT), 5000);
-                socket.setSoTimeout(5000);
-                if (socket == null) {
+                try {
+                    socket = new Socket();
+                    socket.connect(new InetSocketAddress(IP, PORT), 5000);
+                }   catch (SocketTimeoutException e){
+                    FloatingActionButton fabAdd = findViewById(R.id.fab);
+                    Snackbar.make(fabAdd, "Failed to connect to the internet, please try again later!", Snackbar.LENGTH_LONG).show();
                     successfulConnection = 0;
                     return;
                 }
@@ -722,6 +883,135 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    class getStatusList implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                if (statusListType!=0 && statusListType!=1 && statusListType!=2){return;}
+                try {
+                    socket = new Socket();
+                    socket.connect(new InetSocketAddress(IP, PORT), 5000);
+                }   catch (SocketTimeoutException e){
+//                    Snackbar.make(findViewById(R.id.main_layout), "Failed to connect to the internet, please try again later!", Snackbar.LENGTH_LONG).show();
+                    successfulConnection = 0;
+                    return;
+                }
+                successfulConnection = 1;
+                dos = new DataOutputStream(socket.getOutputStream());
+                final String message;
+//                String fileName="";
+//                String plName = parkingLots[MainActivity.PARKING_LOT_NUMBER - 1];
+//                Date currentTime = Calendar.getInstance().getTime();
+//                SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy_HH:mm");
+//                String formattedDate = df.format(currentTime);
+//                if (statusListType==0){fileName="monthly_statuses_" + formattedDate + "_" + plName + ".txt";}
+//                else if (statusListType==1){fileName="weekly_statuses_" + plName + "_" + formattedDate + ".txt";}
+//                else if (statusListType==2){fileName="daily_statuses_" + plName + "_" + formattedDate + ".txt";}
+                message = "1 get lists " + statusListType + " " + (MainActivity.PARKING_LOT_NUMBER - 1);
+                String receivedMsg = "";
+                dos.writeUTF(message);
+                dos.flush();
+                dos = new DataOutputStream(socket.getOutputStream());
+                is = socket.getInputStream();
+                byte[] buffer, bufferLen;
+                String receivedMsgLong = "";
+                int messagelen = 0;
+                while (true) {
+                    bufferLen = new byte[1];
+                    is.read(bufferLen);
+                    receivedMsg = new String(bufferLen, "UTF-8");
+                    Log.d("getUpdates", "Received 1: " + receivedMsg);
+                    if (receivedMsg.equals("0")) {
+                        dos.writeUTF("received");
+                        dos.flush();
+                        break;
+                    }
+                    bufferLen = new byte[Integer.parseInt(receivedMsg)];
+                    dos.writeUTF("received");
+                    dos.flush();
+                    is.read(bufferLen);
+                    receivedMsg = new String(bufferLen, "UTF-8");
+                    Log.d("getUpdates", "Received 2: " + receivedMsg);
+                    messagelen = Integer.parseInt(receivedMsg) / 2;
+                    buffer = new byte[Integer.parseInt(receivedMsg)];
+                    dos.writeUTF("received");
+                    dos.flush();
+                    is.read(buffer);
+                    receivedMsg = new String(buffer, "UTF-8");
+                    receivedMsgLong += receivedMsg.substring(0, receivedMsg.indexOf('|'));
+//                    Log.i("Receiving statuses", Integer.toString(receivedMsg.substring(0,receivedMsg.indexOf('|')).length()));
+//                    Log.i("Receiving statuses", receivedMsg);
+                    dos.writeUTF("received");
+                    dos.flush();
+                }
+                if (receivedMsg != null) {
+//                    messages = receivedMsgLong.split("\n");
+                    final String messagesConnected = receivedMsgLong;
+                    Log.d("getUpdates", "Received updates: " + messages.length);
+                    final Semaphore mutex = new Semaphore(0);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            writeToFile(messagesConnected);
+                            mutex.release();
+                        }
+                    });
+                    try {
+                        mutex.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Log.d("getUpdates", "Error Receiving updates");
+                }
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void writeToFile(String data) {
+//        try {
+//            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(this.openFileOutput(fileName, Context.MODE_PRIVATE));
+//            outputStreamWriter.write(data);
+//            outputStreamWriter.close();
+//            Toast.makeText(this, "Saved in ", Toast.LENGTH_LONG).show();
+//        }
+        requestAppPermissions();
+        String plName = parkingLots[MainActivity.PARKING_LOT_NUMBER - 1];
+        Date currentTime = Calendar.getInstance().getTime();
+        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy_HH:mm");
+        String formattedDate = df.format(currentTime);
+        String fileName = plName + "_" + formattedDate + ".txt";
+        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(dir, "Status Files");
+        if (!file.exists()) {
+            Log.d("TEST", "writeToFile: 1");
+            file.mkdir();
+        }
+        if (statusListType==0){file = new File(file,"Monthly Statuses");}
+        else if (statusListType==1){file = new File(file,"Weekly Statuses");}
+        else if (statusListType==2){file = new File(file,"Daily Statuses");}
+        else {Toast.makeText(this, "Error saving the file.", Toast.LENGTH_LONG).show(); return;}
+        if (!file.exists()) {
+            Log.d("TEST", "writeToFile: 2");
+            file.mkdir();
+        }
+        try {
+            File gpxfile = new File(file, fileName);
+            FileWriter writer = new FileWriter(gpxfile);
+            writer.write(data);
+            writer.flush();
+            writer.close();
+            Toast.makeText(this, "Statuses saved successfully\n" + file.toString() +"/"+ fileName, Toast.LENGTH_LONG).show();}
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+
         }
     }
 }

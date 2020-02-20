@@ -11,5 +11,6 @@
     <color name="grayBlue3">#7A89C2</color>
     <color name="grayBlue4">#72788D</color>
     <color name="grayBlue5">#636B61</color>
+    <color name="colorTransBg">#26000000</color>
 
 </resources>

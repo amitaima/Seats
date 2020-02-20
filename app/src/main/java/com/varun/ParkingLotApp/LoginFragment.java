@@ -4,6 +4,8 @@ package com.varun.ParkingLotApp;
 import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,9 +50,10 @@ public class LoginFragment extends Fragment {
 
         passwordButton = myView.findViewById(R.id.submit_button);
         passwordInput = myView.findViewById(R.id.password_editText);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            loginPreferences = getContext().getSharedPreferences("loginPrefs", MODE_PRIVATE);
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            loginPreferences = getContext().getSharedPreferences("loginPrefs", MODE_PRIVATE);
+//        }
+        loginPreferences = this.getActivity().getSharedPreferences("loginPrefs", MODE_PRIVATE);
         loginPrefsEditor = loginPreferences.edit();
 
         passwordInput.setHint("סיסמה");
