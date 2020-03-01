@@ -2,16 +2,20 @@ package com.varun.ParkingLotApp;
 
 import android.Manifest;
 import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
@@ -27,6 +31,8 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -74,17 +80,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     public String spots2 =
-            "X/"
-                    + "AAAAAAAAAA/"
-                    + "AAAAAAAAAA/"
-                    + "AAAAAAAAAA/"
-                    + "AAAAAAAAAA/"
-                    + "AAAAAAAAAA/"
-                    + "AAAAAAAAAA/"
-                    + "AAAAAAAAAA/"
-                    + "AAAAAAAAAA/"
-                    + "AAAAAAAAAA/"
-                    + "AAAAAAAAAA/";
+             "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/"
+                    + "AAAAA/";
 
     public String spots3 =
                     "______________/"
@@ -284,8 +299,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         PARKING_LOT_NAME = parkingLots[PARKING_LOT_NUMBER - 1];
         spots = spots2; // Do like the parking_lot_name...
 
+        TextView titleTV = findViewById(R.id.AppTitleMain);
+        titleTV.setText(PARKING_LOT_NAME);
+
         int spotHeight = (Resources.getSystem().getDisplayMetrics().heightPixels) / 10;
-        int spotWidth = (Resources.getSystem().getDisplayMetrics().widthPixels) / 11+5;
+        int spotWidth = (Resources.getSystem().getDisplayMetrics().widthPixels) / 10;
+//        int spotHeight = (Resources.getSystem().getDisplayMetrics().heightPixels) / 14;
+//        int spotWidth = (Resources.getSystem().getDisplayMetrics().widthPixels) / 5-7;
         Log.e("Screen size", String.valueOf(Resources.getSystem().getDisplayMetrics().heightPixels));
         Log.e("Screen size", String.valueOf(Resources.getSystem().getDisplayMetrics().heightPixels / 24));
 
@@ -306,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         count = 0;
         countAll = 0;
         countX = 0;
-        int size = (spotWidth + spotGapingH + spotGapingH) * 10;
+        int size = (spotWidth + spotGapingH + spotGapingH) * 5; // 10
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
@@ -319,54 +339,110 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else if (spots.charAt(index) == 'U') {
                 count++;
                 countAll++;
-                TextView view = new TextView(this);
-//                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(spotSize, spotSize);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(spotWidth, spotHeight);
-//                layoutParams.weight = 1;
-                layoutParams.setMargins(spotGapingH, spotGapingV, spotGapingH, spotGapingV);
-                view.setLayoutParams(layoutParams);
-                view.setTypeface(null, Typeface.BOLD);
-//                view.setPadding(0, 0, 0, 2 * spotGapingV);
-                view.setPadding(0, 0, 0, 0);
-                view.setId(count);
-                view.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
-                view.setBackgroundResource(R.drawable.ic_car_red);
-//                view.setBackgroundColor(Color.RED);
-                view.setTextColor(Color.WHITE);
-                view.setTag(STATUS_PRESENT);
-//                view.setText(count + "");
-//                view.setText("מלכה");
-                view.setText(dbHandler.nameFromId(count));
-                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, spotWidth / 13 + additionByScreen); //spotWidth/13+4
-                layout.addView(view);
-                spotViewList.add(view);
-                view.setOnClickListener(this);
+//                TextView view = new TextView(this);
+////                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(spotSize, spotSize);
+//                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(spotWidth, spotHeight);
+////                layoutParams.weight = 1;
+//                layoutParams.setMargins(spotGapingH, spotGapingV, spotGapingH, spotGapingV);
+//                view.setLayoutParams(layoutParams);
+//                view.setTypeface(null, Typeface.BOLD);
+////                view.setPadding(0, 0, 0, 2 * spotGapingV);
+//                view.setPadding(0, 0, 0, 0);
+//                view.setId(count);
+//                view.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+//                view.setBackgroundResource(R.drawable.ic_car_red);
+////                view.setBackgroundColor(Color.RED);
+//                view.setTextColor(Color.WHITE);
+//                view.setTag(STATUS_PRESENT);
+////                view.setText(count + "");
+////                view.setText("מלכה");
+//                view.setText(dbHandler.nameFromId(count));
+//                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, spotWidth / 13 + additionByScreen); //spotWidth/13+4
+//                layout.addView(view);
+//                spotViewList.add(view);
+//                view.setOnClickListener(this);
+
+                LinearLayout layoutSection = new LinearLayout(this);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                params.gravity = Gravity.CENTER;
+                params.setMargins(5,5,5,5);
+                layoutSection.setPadding(20,0,20,0);
+                layoutSection.setGravity(Gravity.CENTER);
+                layoutSection.setOrientation(LinearLayout.VERTICAL);
+                ImageView iv = new ImageView(this);
+                iv.setImageResource(R.drawable.ic_car_from_above_taken); //42444B
+                iv.setLayoutParams(layoutParams);
+                TextView tv = new TextView(this);
+                tv.setText(dbHandler.nameFromId(count));
+                tv.setId(count);
+                tv.setGravity(Gravity.CENTER);
+                layoutSection.setId(count+10000);
+                iv.setId(count+20000);
+                layoutSection.setTag(STATUS_PRESENT);
+                tv.setTextColor(getResources().getColor(R.color.parkingNameTxt));
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, spotWidth / 13 + additionByScreen); //spotWidth/13+4
+                layoutSection.addView(iv);
+                layoutSection.addView(tv);
+                layout.addView(layoutSection);
+                spotViewList.add(tv);
+                layoutSection.setOnClickListener(this);
             } else if (spots.charAt(index) == 'A') {
                 count++;
                 countAll++;
-                TextView view = new TextView(this);
-//                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(spotSize, spotSize);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(spotWidth, spotHeight);
-//                layoutParams.weight = 1;
-                layoutParams.setMargins(spotGapingH, spotGapingV, spotGapingH, spotGapingV);
-                view.setLayoutParams(layoutParams);
-                view.setPadding(0, 12, 0, 2 * spotGapingV);
-                view.setId(count);
-                view.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
-                view.setBackgroundResource(R.drawable.ic_car_green_1);
-//                view.setBackgroundColor(Color.GREEN);
-//                view.setText(count + "");
-//                view.setText(dbHandler.getNameById(count));
-                view.setText(dbHandler.nameFromId(count));
-//                view.setText("13A");
-//                view.setAutoSizeTextTypeUniformWithConfiguration(3,10,1,TypedValue.COMPLEX_UNIT_DIP);
-//                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 3, 5, 1, TypedValue.COMPLEX_UNIT_DIP);
-                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, spotWidth / 13 + additionByScreen); //spotWidth/13+4
-                view.setTextColor(Color.BLACK);
-                view.setTag(STATUS_MISSING);
-                layout.addView(view);
-                spotViewList.add(view);
-                view.setOnClickListener(this);
+//                TextView view = new TextView(this);
+////                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(spotSize, spotSize);
+//                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(spotWidth, spotHeight);
+////                layoutParams.weight = 1;
+//                layoutParams.setMargins(spotGapingH, spotGapingV, spotGapingH, spotGapingV);
+//                view.setLayoutParams(layoutParams);
+//                view.setPadding(0, 12, 0, 2 * spotGapingV);
+//                view.setId(count);
+//                view.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+//                view.setBackgroundResource(R.drawable.ic_car_green_1);
+////                view.setBackgroundColor(Color.GREEN);
+////                view.setText(count + "");
+////                view.setText(dbHandler.getNameById(count));
+//                view.setText(dbHandler.nameFromId(count));
+////                view.setText("13A");
+////                view.setAutoSizeTextTypeUniformWithConfiguration(3,10,1,TypedValue.COMPLEX_UNIT_DIP);
+////                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(view, 3, 5, 1, TypedValue.COMPLEX_UNIT_DIP);
+//                view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, spotWidth / 13 + additionByScreen); //spotWidth/13+4
+//                view.setTextColor(Color.BLACK);
+//                view.setTag(STATUS_MISSING);
+//                layout.addView(view);
+//                spotViewList.add(view);
+//                view.setOnClickListener(this);
+
+                LinearLayout layoutSection = new LinearLayout(this);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(spotWidth+60, spotHeight+60);
+                params.gravity = Gravity.CENTER;
+                layoutParams.setMargins(0,0,0,-40);
+                layoutSection.setPadding(20,0,20,0);
+                layoutSection.setGravity(Gravity.CENTER);
+                layoutSection.setOrientation(LinearLayout.VERTICAL);
+//                layoutSection.setBackground(ContextCompat.getDrawable(this, R.drawable.my_login_button));
+                ImageView iv = new ImageView(this);
+                iv.setImageResource(R.drawable.ic_car_from_above_free); //9A9FAB
+                iv.setLayoutParams(layoutParams);
+                TextView tv = new TextView(this);
+                tv.setText(dbHandler.nameFromId(count));
+                tv.setGravity(Gravity.CENTER);
+                tv.setId(count);
+                layoutSection.setId(count+10000);
+                iv.setId(count+20000);
+                layoutSection.setTag(STATUS_MISSING);
+                iv.setPadding(0,0,0,0);
+//                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//                lp.setMargins(0, 0, 0, 0);
+//                iv.setLayoutParams(lp);
+                tv.setTextColor(getResources().getColor(R.color.parkingNameTxt));
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, spotWidth / 8 + additionByScreen); //spotWidth/13+4
+                layoutSection.addView(iv);
+                layoutSection.addView(tv);
+                layout.addView(layoutSection);
+                spotViewList.add(tv);
+                layoutSection.setOnClickListener(this);
             } else if (spots.charAt(index) == 'X') {
                 countAll++;
                 TextView view = new TextView(this);
@@ -377,7 +453,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                view.setBackgroundColor(getResources().getColor(R.color.veryLiightGray));
                 view.setId(R.id.NameText);
                 view.setText(PARKING_LOT_NAME);
-                view.setTextColor(Color.BLACK);
+                view.setTextColor(getResources().getColor(R.color.parkingNameTxt));
                 view.setGravity(Gravity.CENTER);
                 view.setTypeface(null, Typeface.BOLD);
                 view.setOnClickListener(this);
@@ -413,17 +489,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public static void setMissing(int id) {
-        TextView view = layout.findViewById(id);
-        view.setBackgroundResource(R.drawable.ic_car_green_1);
-        view.setTextColor(Color.BLACK);
-        view.setTag(1);
+        LinearLayout ll = layout.findViewById(id+10000);
+        TextView tv = ll.findViewById(id);
+        ImageView iv = ll.findViewById(id+20000);
+        iv.setImageResource(R.drawable.ic_car_from_above_free);
+        tv.setTextColor(Color.BLACK);
+        ll.setTag(1);
     }
 
     public static void setPresent(int id) {
-        TextView view = layout.findViewById(id);
-        view.setBackgroundResource(R.drawable.ic_car_red);
-        view.setTextColor(Color.BLACK);
-        view.setTag(2);
+        LinearLayout ll = layout.findViewById(id+10000);
+        TextView tv = ll.findViewById(id);
+        ImageView iv = ll.findViewById(id+20000);
+        iv.setImageResource(R.drawable.ic_car_from_above_taken);
+        tv.setTextColor(Color.BLACK);
+        ll.setTag(2);
     }
 
 
@@ -454,7 +534,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         currParkingId = view.getId();
-        Log.d("ONCLICK: ", "currId: " + currParkingId);
+        currParkingId-=10000;
+        Log.d("ONCLICK: ", "currId: " +currParkingId);
         Thread getUserThread = new Thread(new getUserThread());
         getUserThread.start();
 //        int[] backgrounds = {R.drawable.b1,R.drawable.b2,R.drawable.b3,R.drawable.b4,R.drawable.b5,R.drawable.b6,R.drawable.b7,R.drawable.b8,R.drawable.b9,R.drawable.b10, R.drawable.b11, R.drawable.b12, R.drawable.b13};
@@ -682,15 +763,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     is.read(buffer);
                     receivedMsg = new String(buffer, "UTF-8");
                     if (receivedMsg != null) {
-                        if (!receivedMsg.equals(statuses) || 1==1) {
+                        if (!receivedMsg.equals(statuses)) { // || 1==1
                             statuses = receivedMsg;
                             final Semaphore mutex = new Semaphore(0);
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     for (int i = 1; i <= count; i++) {
-                                        dbHandler.UpdateUserStatus("green", i);
-                                        MainActivity.setMissing(i);
+                                        if (statuses.indexOf(Integer.toString(i))<0) {
+                                            dbHandler.UpdateUserStatus("green", i);
+                                            MainActivity.setMissing(i);
+                                        }
 
                                     }
                                     mutex.release();
@@ -701,12 +784,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            String[] statuses = receivedMsg.split(" ");
                             Log.d("getStatuses", "Received statuses");
-                            for (int i = 0; i < statuses.length; i++) {
-                                if (statuses[i] != "" && statuses[i] != null) {
-                                    dbHandler.UpdateUserStatus("red", Integer.parseInt(statuses[i]));
-                                    currentStatus = Integer.parseInt(statuses[i]);
+                            final String[] statusesSplit = receivedMsg.split(" ");
+                            for (int i = 0; i < statusesSplit.length; i++) {
+                                if (statusesSplit[i] != "" && statusesSplit[i] != null) {
+                                    dbHandler.UpdateUserStatus("red", Integer.parseInt(statusesSplit[i]));
+                                    currentStatus = Integer.parseInt(statusesSplit[i]);
 //                            setMissing(Integer.parseInt(statuses[i]));
                                     final Semaphore mutex1 = new Semaphore(0);
                                     runOnUiThread(new Runnable() {
@@ -790,6 +873,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void setNewUsers(int id, String name) {
+        LinearLayout ll = layout.findViewById(id+10000);
+        ImageView iv = layout.findViewById(id+20000);
         TextView view = layout.findViewById(id);
 //        view.setText(dbHandler.getNameById(id));
         view.setText(name);
@@ -798,9 +883,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            view.setTextColor(Color.GRAY);
 //            view.setTag(1);
 //        }
-        view.setBackgroundResource(R.drawable.ic_car_green_1);
-        view.setTextColor(Color.GRAY);
-        view.setTag(1);
+        iv.setImageResource(R.drawable.ic_car_from_above_free);
+        view.setTextColor(Color.BLACK);
+        ll.setTag(1);
     }
 
     int turn = 0;
@@ -949,7 +1034,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     dos.flush();
                 }
                 if (receivedMsg != null) {
-//                    messages = receivedMsgLong.split("\n");
+                    messages = receivedMsgLong.split("\n");
                     final String messagesConnected = receivedMsgLong;
                     Log.d("getUpdates", "Received updates: " + messages.length);
                     final Semaphore mutex = new Semaphore(0);
@@ -1008,10 +1093,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             writer.write(data);
             writer.flush();
             writer.close();
+            Bundle bundle = new Bundle();
+            bundle.putString("data", data);
+            bundle.putString("name", fileName);
+//            Fragment myFragment = new ReportFragment();
+//            FragmentManager fragmentManager = getFragmentManager();
+//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//            fragmentTransaction.replace(R.id.contentFrame, myFragment);
+//            myFragment.setArguments(bundle);
+//            fragmentTransaction.addToBackStack(myFragment.toString());
+//            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//            fragmentTransaction.commit();
+            android.support.v4.app.FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
+            android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            ReportFragment fragment = new ReportFragment();
+            fragment.setArguments(bundle);
+            fragmentTransaction.replace(R.id.ReportFragment, fragment);
+            fragmentTransaction.addToBackStack(fragment.toString());
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.commit();
+//            getSupportFragmentManager().beginTransaction().add(R.id.ReportFragment, new ReportFragment()).addToBackStack(null).commit();
             Toast.makeText(this, "Statuses saved successfully\n" + file.toString() +"/"+ fileName, Toast.LENGTH_LONG).show();}
         catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
-
         }
     }
 }

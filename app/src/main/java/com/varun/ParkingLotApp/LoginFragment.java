@@ -1,6 +1,8 @@
 package com.varun.ParkingLotApp;
 
 
+import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -14,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.DataOutputStream;
@@ -47,6 +50,11 @@ public class LoginFragment extends Fragment {
         String[] items = MainActivity.parkingLots;
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(myView.getContext(), android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
+        TextView tx = (TextView) myView.findViewById(R.id.AppTitleLogin);
+
+        Typeface custom_font = Typeface.createFromAsset(myView.getContext().getAssets(),  "fonts/Army Buster.otf");
+
+        tx.setTypeface(custom_font);
 
         passwordButton = myView.findViewById(R.id.submit_button);
         passwordInput = myView.findViewById(R.id.password_editText);
@@ -133,4 +141,26 @@ public class LoginFragment extends Fragment {
             }
         }
     }
+
+//    @Override
+//    public void onDetach() { // Exits app if back button pressed!
+//        super.onDetach();
+//        if(isRemoving()){
+//            Intent intent = new Intent(Intent.ACTION_MAIN);
+//            intent.addCategory(Intent.CATEGORY_HOME);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivity(intent);
+//        }
+//    }
+
+//    @Override
+//    public void onDestroyView() {
+//        super.onDestroyView();
+//        if(isRemoving()){
+//            Intent intent = new Intent(Intent.ACTION_MAIN);
+//            intent.addCategory(Intent.CATEGORY_HOME);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivity(intent);
+//        }
+//    }
 }

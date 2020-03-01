@@ -4,7 +4,9 @@
     <dimen name="fab_margin" tools:ignore="MissingDefaultResource">16dp</dimen>
     <dimen name="standard_12" tools:ignore="MissingDefaultResource">12dp</dimen>
     <dimen name="standard_23" tools:ignore="MissingDefaultResource">23dp</dimen>
+    <dimen name="standard_35" tools:ignore="MissingDefaultResource">35dp</dimen>
     <dimen name="standard_55" tools:ignore="MissingDefaultResource">55dp</dimen>
     <dimen name="standard_100" tools:ignore="MissingDefaultResource">100dp</dimen>
     <dimen name="standard_145" tools:ignore="MissingDefaultResource">145dp</dimen>
+    <dimen name="standard_190" tools:ignore="MissingDefaultResource">190dp</dimen>
 </resources>
