@@ -1,70 +1,32 @@
-# Booking-Seats-Layout-Sample
+Moreshet Synagogue Seating App
 
-This project is sample app for Android it generates a dynamic layout for booking seats.
+An Android app for Beit Knesset Moreshet, designed to manage and display seating arrangements for Shabbat services.
 
+Overview
 
-![seat layout sample](https://user-images.githubusercontent.com/24667361/43626651-787094d2-9710-11e8-97c2-0ceb4db5b719.gif)
+The Moreshet Seating App is built to run on a TV display inside the synagogue.
+It shows a live map of the Beit Knesset, allowing attendees to easily see which seats are available (green) or occupied (red) before and during Shabbat.
 
-To create the layout dynamically we need to pass specific syntax in string so the method could understand and process it. 
+Features
 
-```java
-String seats =        "_UUUUUUAAAAARRRR_/"
-                    + "_________________/"
-                    + "UU__AAAARRRRR__RR/"
-                    + "UU__UUUAAAAAA__AA/"
-                    + "AA__AAAAAAAAA__AA/"
-                    + "AA__AARUUUURR__AA/"
-                    + "UU__UUUA_RRRR__AA/"
-                    + "AA__AAAA_RRAA__UU/"
-                    + "AA__AARR_UUUU__RR/"
-                    + "AA__UUAA_UURR__RR/"
-                    + "_________________/"
-                    + "UU_AAAAAAAUUUU_RR/"
-                    + "RR_AAAAAAAAAAA_AA/"
-                    + "AA_UUAAAAAUUUU_AA/"
-                    + "AA_AAAAAAUUUUU_AA/"
-                    + "_________________/";
-```
-As for this sample we have 3 status for the seats :<br />
-* U is for already booked seats<br />
-* R is for reserved seats<br />
-* A is for available seats<br />
+🪑 Interactive Seating Map — Displays a visual map of the synagogue with color-coded seats:
 
-* _ is for empty space<br />
+🟩 Green: Available
 
-You can customize this string according to your seats arrangement. As of this string it has 175 seats each having unique id assigned to it. The assigned id is useful for sending the booked seats request to server. 
+🟥 Red: Occupied
 
-**Reserved seats VS Booked seats**<br />
-Both can't be booked but showing them with seperates colors cause the reserved seats can be available with time.
+📺 TV Display Mode — Optimized for large screens, showing real-time seating updates.
 
-**Limitation**<br />
-It's not recycling the views.
+📩 Automated SMS System — Sends a message to each seat holder before Shabbat asking:
 
+“How many of your seats will you be using this Shabbat?”
 
-## About Me
+🔁 Dynamic Updates — The seating map automatically updates based on responses received.
 
-Varun John<br />
-Sr. Android Developer<br />
-varunjohn1990@gmail.com<br />
-Skype varun.john1990<br />
-Follow me https://github.com/varunjohn for other samples and libraries like these
+Tech Stack
 
-**If you like this sample then please add a star on this project :)**
+Platform: Android
 
+Display: TV mode
 
-## License
-```
-   Copyright 2018 Varun John
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-```
+Communication: SMS integration for seat confirmation
